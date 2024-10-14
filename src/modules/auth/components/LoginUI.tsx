@@ -11,7 +11,7 @@ const LoginForm = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
   const defaultValues: ILoginForm = {
-    email: "devops@200lab.io",
+    email: "mario2@gmail.com",
     password: "12345678",
   };
 

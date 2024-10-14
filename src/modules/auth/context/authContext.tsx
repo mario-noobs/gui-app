@@ -101,7 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem("access_token", token);
       })
       .then(async () => {
-        await handleGetProfile();
+        // await handleGetProfile();
         navigate("/");
       })
       .catch((error) => {

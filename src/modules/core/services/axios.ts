@@ -25,7 +25,7 @@ export function HandleError(
 }
 
 const interceptor = axios.create({
-  baseURL: "https://devops-gateway.showcase.200lab.io",
+  baseURL: "https://omari.id.vn",
   headers: {
     "Content-Type": "application/json",
   },

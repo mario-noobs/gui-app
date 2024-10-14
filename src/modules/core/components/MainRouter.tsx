@@ -3,6 +3,8 @@ import { AuthLayout } from "../../auth/components/AuthLayout";
 import LoginForm from "../../auth/components/LoginUI";
 import { RegisterUI } from "../../auth/components/RegisterUI";
 import TodoList from "../../todo/components/TodoList";
+import ImageUpload from "../../face-reg/components/ImageUpload";
+
 import PageNotFound from "./PageNotFound";
 import { PrivateComponent } from "../../auth/components/PrivateComponent";
 import { MainLayout } from "./MainLayout";
@@ -19,14 +21,14 @@ export const MainRouter = () => {
       <Route
         path="/"
         element={
-          <PrivateComponent>
+          // <PrivateComponent>
             <MainLayout>
               <Outlet />
             </MainLayout>
-          </PrivateComponent>
+          // </PrivateComponent>
         }
       >
-        <Route path="/" element={<TodoList />} />
+        <Route path="/" element={<ImageUpload />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

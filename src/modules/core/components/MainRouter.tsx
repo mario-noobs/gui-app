@@ -45,7 +45,6 @@ export const MainRouter = () => {
       <Route path="*" element={<PageNotFound />} />
 
       {/* <Route path="/inbox" element={<InboxComponent />} /> */}
-      
       {/* <Route path="/settings" element={<SettingsComponent />} /> */}
       {/* <Route path="/logout" element={<LogoutComponent />} /> */}
     </Routes>

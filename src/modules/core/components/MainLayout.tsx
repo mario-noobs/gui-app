@@ -6,7 +6,7 @@ interface IMainLayoutProps {
 
 export const MainLayout = ({ children }: IMainLayoutProps) => {
   return (
-    <div className="h-screen bg-gray-900 flex flex-col">
+    <div className="h-screen bg-gray-200 flex flex-col">
       <Header />
       <div className="flex-grow p-8 flex flex-col overflow-hidden">
         {children}

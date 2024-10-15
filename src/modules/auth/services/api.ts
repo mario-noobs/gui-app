@@ -17,9 +17,9 @@ export const LoginAPI = <T>(data: ILoginForm): Promise<T> => {
 export const GetProfileAPI = <T>(): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .get("/user/v1/profile", {
+      .post("/profile", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `${localStorage.getItem("access_token")}`,
         },
       })
       .then((response) => {

@@ -4,7 +4,7 @@ import { ILoginForm, IRegisterForm, IUpdateProfile } from "../models/auth";
 export const LoginAPI = <T>(data: ILoginForm): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .post("/auth/v1/authenticate", data)
+      .post("/api/v1/user/authenticate", data)
       .then((response) => {
         resolve(response.data);
       })
@@ -17,9 +17,9 @@ export const LoginAPI = <T>(data: ILoginForm): Promise<T> => {
 export const GetProfileAPI = <T>(): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .get("/user/v1/profile", {
+      .post("/profile", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `${localStorage.getItem("access_token")}`,
         },
       })
       .then((response) => {
@@ -34,7 +34,7 @@ export const GetProfileAPI = <T>(): Promise<T> => {
 export const RegisterAPI = <T>(data: IRegisterForm): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .post("/auth/v1/register", data)
+      .post("/api/v1/user/register", data)
       .then((response) => {
         resolve(response.data);
       })

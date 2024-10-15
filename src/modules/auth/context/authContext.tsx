@@ -8,7 +8,6 @@ import {
 } from "../models/auth";
 import { ErrorResponse, useNavigate } from "react-router-dom";
 import {
-  GetProfileAPI,
   LoginAPI,
   RegisterAPI,
   UpdateProfileAPI,
@@ -18,6 +17,7 @@ import { HandleError } from "../../core/services/axios";
 import { IResponse } from "../../core/models/core";
 import { useSnackbar } from "notistack";
 import LoadingPage from "../../core/components/Loading";
+import { GetProfileAPI } from "../../home/services/api";
 
 type AuthContextType = {
   profile: IProfile | null;

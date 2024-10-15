@@ -3,9 +3,15 @@ import { AuthLayout } from "../../auth/components/AuthLayout";
 import LoginForm from "../../auth/components/LoginUI";
 import { RegisterUI } from "../../auth/components/RegisterUI";
 import TodoList from "../../todo/components/TodoList";
+import ImageUpload from "../../face-reg/components/ImageUpload";
+
 import PageNotFound from "./PageNotFound";
 import { PrivateComponent } from "../../auth/components/PrivateComponent";
 import { MainLayout } from "./MainLayout";
+import { DefaultSidebar } from "../../home/Sidebar";
+import Dashboard from "../../home/pages/Dashboard";
+import ECommerce from "../../home/pages/ECommerce";
+import Profile from "../../home/pages/Profile";
 
 export const MainRouter = () => {
   return (
@@ -19,16 +25,28 @@ export const MainRouter = () => {
       <Route
         path="/"
         element={
-          <PrivateComponent>
+          // <PrivateComponent>
             <MainLayout>
+                <div className="flex">
+                  <DefaultSidebar />
+                <div className="flex-1">
               <Outlet />
+                </div>
+              </div>
             </MainLayout>
-          </PrivateComponent>
+          // </PrivateComponent>
         }
       >
-        <Route path="/" element={<TodoList />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/e-commerce" element={<ECommerce />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
+
+      {/* <Route path="/inbox" element={<InboxComponent />} /> */}
+      {/* <Route path="/settings" element={<SettingsComponent />} /> */}
+      {/* <Route path="/logout" element={<LogoutComponent />} /> */}
     </Routes>
   );
 };

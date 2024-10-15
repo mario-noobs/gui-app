@@ -25,7 +25,7 @@ export function HandleError(
 }
 
 const interceptor = axios.create({
-  baseURL: "https://devops-gateway.showcase.200lab.io",
+  baseURL: "https://omari.id.vn",
   headers: {
     "Content-Type": "application/json",
   },
@@ -33,7 +33,7 @@ const interceptor = axios.create({
 
 interceptor.interceptors.request.use((config) => {
   // config.url = "https://devops-gateway.showcase.200lab.io";
-  config.headers.Authorization = `Bearer ${localStorage.getItem(
+  config.headers.Authorization = `${localStorage.getItem(
     "access_token"
   )}`;
   return config;

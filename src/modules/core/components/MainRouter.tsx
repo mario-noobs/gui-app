@@ -12,6 +12,9 @@ import { DefaultSidebar } from "../../home/Sidebar";
 import Dashboard from "../../home/pages/Dashboard";
 import ECommerce from "../../home/pages/ECommerce";
 import Profile from "../../home/pages/Profile";
+import FaceControlPage from "../../face-reg/components/FaceHome";
+import Register from "../../face-reg/register/component/Register";
+import Recognize from "../../face-reg/recognize/component/Recognize";
 
 export const MainRouter = () => {
   return (
@@ -40,13 +43,16 @@ export const MainRouter = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/e-commerce" element={<ECommerce />} />
+        <Route path="/face-regconize" element={<FaceControlPage />}>
+          {/* <Route path="register" element={<Register />} />
+          <Route path="recognize" element={<Recognize />} /> */}
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
 
-      {/* <Route path="/inbox" element={<InboxComponent />} /> */}
-      {/* <Route path="/settings" element={<SettingsComponent />} /> */}
-      {/* <Route path="/logout" element={<LogoutComponent />} /> */}
+      <Route path="/inbox" element={<ECommerce />} />
+      <Route path="/settings" element={<ECommerce />} />
+      <Route path="/logout" element={<ECommerce />} />
     </Routes>
   );
 };

@@ -14,9 +14,6 @@ const Dashboard = () => {
         <Typography color="gray" className="mb-4">
           Here you can manage your account settings, view your analytics, and much more.
         </Typography>
-        <Button color="blue" onClick={() => alert('Action Button Clicked!')}>
-          Take Action
-        </Button>
       </Card>
     </div>
   );

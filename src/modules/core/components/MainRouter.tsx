@@ -44,8 +44,8 @@ export const MainRouter = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/face-regconize" element={<FaceControlPage />}>
-          {/* <Route path="register" element={<Register />} />
-          <Route path="recognize" element={<Recognize />} /> */}
+          <Route path="register" element={<Register />} />
+          {/* <Route path="recognize" element={<Recognize />} /> */}
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

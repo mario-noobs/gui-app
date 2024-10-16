@@ -12,12 +12,12 @@ const FaceControlPage = () => {
 
   const handleRegisterClick = () => {
     setIsRegistered(true);
-    navigate('/e-commerce/register');
+    navigate('/face-regconize/register');
   };
 
   const handleRecognizeClick = () => {
     setIsRegistered(false);
-    navigate('/e-commerce/recognize');
+    navigate('/face-regconize/recognize');
   };
 
   return (

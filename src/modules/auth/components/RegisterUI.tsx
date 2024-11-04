@@ -9,8 +9,10 @@ import { useAuth } from "../hooks/useAuth";
 export const RegisterUI = () => {
   const { handleRegister } = useAuth();
   const defaultValues: IRegisterForm = {
-    password: "",
-    email: "",
+    auth_email_password: {
+      password: "",
+      email: "",
+    },
     first_name: "",
     last_name: "",
   };
@@ -47,7 +49,7 @@ export const RegisterUI = () => {
           </div>
           <div className="mb-4">
             <RHFInput
-              name="email"
+              name="auth_email_password.email"
               type="text"
               placeholder="Enter your email"
               label="Email"
@@ -55,7 +57,7 @@ export const RegisterUI = () => {
           </div>
           <div className="mb-6 relative">
             <RHFInput
-              name="password"
+              name="auth_email_password.password"
               type="password"
               placeholder="Enter your password"
               label="Password"

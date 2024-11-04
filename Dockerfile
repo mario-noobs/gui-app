@@ -6,9 +6,9 @@ COPY package.json pnpm-lock.yaml ./
 
 RUN corepack enable pnpm
 
-RUN pnpm install
-
 COPY . .
+
+RUN pnpm install
 
 RUN pnpm build
 

@@ -29,7 +29,7 @@ export function handleError(err: Error | AxiosError<ErrorResponse>): ErrorRespon
 
 // Create an Axios instance
 const apiClient = axios.create({
-  baseURL: "https://omari.id.vn",
+  baseURL: "http://75.119.149.223:3000",
   headers: {
     "Content-Type": "application/json",
   },

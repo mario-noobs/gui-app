@@ -1,4 +1,3 @@
-import React from 'react';
 import { Typography, Card, Button } from "@material-tailwind/react";
 
 const Dashboard = () => {

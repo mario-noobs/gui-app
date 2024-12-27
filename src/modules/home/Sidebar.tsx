@@ -1,5 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom";
 import {
   Card,
   Typography,
@@ -18,6 +17,20 @@ import {
   PowerIcon,
 } from "@heroicons/react/24/solid";
 
+const menuItems = [
+  { to: "/dashboard", label: "Dashboard", icon: <PresentationChartBarIcon className="h-5 w-5" /> },
+  { to: "/e-commerce", label: "E-Commerce", icon: <ShoppingBagIcon className="h-5 w-5" /> },
+  { 
+    to: "/inbox", 
+    label: "Inbox", 
+    icon: <InboxIcon className="h-5 w-5" />, 
+    suffix: <Chip value="14" size="sm" variant="ghost" color="blue-gray" className="rounded-full" /> 
+  },
+  { to: "/profile", label: "Profile", icon: <UserCircleIcon className="h-5 w-5" /> },
+  { to: "/settings", label: "Settings", icon: <Cog6ToothIcon className="h-5 w-5" /> },
+  { to: "/logout", label: "Log Out", icon: <PowerIcon className="h-5 w-5" /> },
+];
+
 export function DefaultSidebar() {
   return (
     <Card className="h-[calc(100vh-2rem)] w-full max-w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
@@ -27,57 +40,15 @@ export function DefaultSidebar() {
         </Typography>
       </div>
       <List>
-        <Link to="/dashboard">
-          <ListItem>
-            <ListItemPrefix>
-              <PresentationChartBarIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            Dashboard
-          </ListItem>
-        </Link>
-        <Link to="/e-commerce">
-          <ListItem>
-            <ListItemPrefix>
-              <ShoppingBagIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            E-Commerce
-          </ListItem>
-        </Link>
-        <Link to="/inbox">
-          <ListItem>
-            <ListItemPrefix>
-              <InboxIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            Inbox
-            <ListItemSuffix>
-              <Chip value="14" size="sm" variant="ghost" color="blue-gray" className="rounded-full" />
-            </ListItemSuffix>
-          </ListItem>
-        </Link>
-        <Link to="/profile">
-          <ListItem>
-            <ListItemPrefix>
-              <UserCircleIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            Profile
-          </ListItem>
-        </Link>
-        <Link to="/settings">
-          <ListItem>
-            <ListItemPrefix>
-              <Cog6ToothIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            Settings
-          </ListItem>
-        </Link>
-        <Link to="/logout">
-          <ListItem>
-            <ListItemPrefix>
-              <PowerIcon className="h-5 w-5" />
-            </ListItemPrefix>
-            Log Out
-          </ListItem>
-        </Link>
+        {menuItems.map(({ to, label, icon, suffix }, index) => (
+          <Link key={index} to={to}>
+            <ListItem>
+              <ListItemPrefix>{icon}</ListItemPrefix>
+              {label}
+              {suffix && <ListItemSuffix>{suffix}</ListItemSuffix>}
+            </ListItem>
+          </Link>
+        ))}
       </List>
     </Card>
   );

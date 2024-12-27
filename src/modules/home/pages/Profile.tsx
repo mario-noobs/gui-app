@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Typography, Avatar, Button, CircularProgress } from "@material-tailwind/react";
+import { useEffect, useState } from 'react';
+import { Card, Typography, Avatar, Button } from "@material-tailwind/react";
 import LoadingPage from '../../core/components/Loading';
 import { HandleError } from '../../core/services/axios';
 import { ErrorResponse } from '../../face-reg/services/axios';
 import { AxiosError } from "axios";
 import { GetProfileAPI } from '../services/api';
+import { enqueueSnackbar } from "notistack";
+
 
 interface UserData {
   data: {
@@ -25,7 +27,7 @@ interface UserData {
 const Profile = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   const handleGetProfile = async () => {
     try {

@@ -6,8 +6,10 @@ export type ILoginForm = {
 export type IRegisterForm = {
   first_name: string;
   last_name: string;
-  email: string;
-  password: string;
+  auth_email_password: {
+    email: string;
+    password: string;
+  };
 };
 
 export type ILoginResponse = {

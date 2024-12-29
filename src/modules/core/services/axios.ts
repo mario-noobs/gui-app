@@ -25,7 +25,7 @@ export function HandleError(
 }
 
 const interceptor = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://ai-backend-service:3000",
   headers: {
     "Content-Type": "application/json",
   },

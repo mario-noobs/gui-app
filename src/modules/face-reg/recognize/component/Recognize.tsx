@@ -1,53 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { MdCloudUpload } from 'react-icons/md';
 import '../style/UploadStyles.css';
-import { RecognizeFaceBiometricAPI, RegisterFaceBiometricAPI } from '../services/apis';
+import { RecognizeFaceBiometricAPI } from '../services/apis';
 import { IFace, IFaceResponse } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
 import { AxiosError } from 'axios';
 import { ErrorResponse, HandleError } from '../../../core/services/axios';
 import { useAuth } from '../../../auth/hooks/useAuth';
+import { useSnackbar } from 'notistack';
 
 const Recognize = () => {
-  const {profile} = useAuth();
-  const [image, setImage] = useState(null);
-  const [faceResponse, setFaceResponse] = useState<IFaceResponse | null>(null);
+  const { profile } = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
+  const [image, setImage] = useState<string | null>(null);
   const [faceData, setFaceData] = useState<IFace | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1]; // Remove prefix
-          setImage(reader.result); // Keep full Base64 for display
-        setFaceData({ 
-          userId: profile?.last_name || "None",
-          imageBase64: base64String }); // Assuming `image` is a field in IFace
+          const base64String = reader.result.split(',')[1];
+          setImage(reader.result);
+          setFaceData({
+            userId: profile?.last_name || "None",
+            imageBase64: base64String
+          });
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleDragOver = (event) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
 
-  const handleDrop = (event) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    const file = event.dataTransfer.files[0];
+    const file = event.dataTransfer.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1]; // Remove prefix
-          setImage(reader.result); // Keep full Base64 for display
-          setFaceData({ 
+          const base64String = reader.result.split(',')[1];
+          setImage(reader.result);
+          setFaceData({
             userId: profile?.last_name || "None",
-            imageBase64: base64String }); // Save only the Base64 string without prefix
+            imageBase64: base64String
+          });
         }
       };
       reader.readAsDataURL(file);
@@ -57,16 +60,15 @@ const Recognize = () => {
   const handleSubmit = async () => {
     if (faceData) {
       setLoading(true);
-      await HandleRegisterBiometric(faceData);
+      await handleRecognizeBiometric(faceData);
     } else {
       console.log('No image data available');
     }
   };
 
-  const HandleRegisterBiometric = async (data: IFace) => {
+  const handleRecognizeBiometric = async (data: IFace) => {
     try {
-      const result = await RecognizeFaceBiometricAPI<IFaceResponse>(data);
-      setFaceResponse(result);
+      await RecognizeFaceBiometricAPI<IFaceResponse>(data);
     } catch (error) {
       enqueueSnackbar(
         HandleError(error as Error | AxiosError<ErrorResponse>).message,
@@ -91,7 +93,10 @@ const Recognize = () => {
         className="image-drop-area"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('file-input').click()}
+        onClick={() => {
+          const input = document.getElementById('file-input');
+          if (input) (input as HTMLInputElement).click();
+        }}
       >
         {image ? (
           <img src={image} alt="Uploaded" className="uploaded-image" />
@@ -105,7 +110,7 @@ const Recognize = () => {
               onChange={handleImageUpload}
               className="file-input"
               id="file-input"
-              style={{ display: 'none' }} // Hide the default file input
+              style={{ display: 'none' }}
             />
           </div>
         )}
@@ -113,12 +118,9 @@ const Recognize = () => {
       <button onClick={handleSubmit} className="submit-button">
         Submit Data
       </button>
+      {/* Optionally display faceResponse here */}
     </div>
   );
 };
 
 export default Recognize;
-function enqueueSnackbar(message: string, arg1: { variant: string; }) {
-  throw new Error('Function not implemented.');
-}
-

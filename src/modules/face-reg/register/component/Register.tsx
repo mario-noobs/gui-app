@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MdCloudUpload } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
@@ -7,24 +7,30 @@ import LoadingPage from '../../../core/components/Loading';
 import { AxiosError } from 'axios';
 import { ErrorResponse, HandleError } from '../../../core/services/axios';
 import { useAuth } from '../../../auth/hooks/useAuth';
+import { useSnackbar } from 'notistack';
 
-const Register = ({ onRegistrationStatusChange }) => {
+interface RegisterProps {
+  onRegistrationStatusChange: (status: boolean) => void;
+}
+
+const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
   const { profile } = useAuth();
-  const [image, setImage] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const [image, setImage] = useState<string | null>(null);
   const [faceData, setFaceData] = useState<IFace | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1]; // Remove prefix
-          setImage(reader.result); // Keep full Base64 for display
-          setFaceData({ 
+          const base64String = reader.result.split(',')[1];
+          setImage(reader.result);
+          setFaceData({
             userId: profile?.last_name || "None",
-            imageBase64: base64String 
+            imageBase64: base64String
           });
         }
       };
@@ -32,22 +38,22 @@ const Register = ({ onRegistrationStatusChange }) => {
     }
   };
 
-  const handleDragOver = (event) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
 
-  const handleDrop = (event) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    const file = event.dataTransfer.files[0];
+    const file = event.dataTransfer.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1]; // Remove prefix
-          setImage(reader.result); // Keep full Base64 for display
-          setFaceData({ 
+          const base64String = reader.result.split(',')[1];
+          setImage(reader.result);
+          setFaceData({
             userId: profile?.last_name || "None",
-            imageBase64: base64String 
+            imageBase64: base64String
           });
         }
       };
@@ -68,7 +74,7 @@ const Register = ({ onRegistrationStatusChange }) => {
     try {
       const result = await RegisterFaceBiometricAPI<IFaceResponse>(data);
       if (result.code === "0000") {
-        onRegistrationStatusChange(true); // Update registration status
+        onRegistrationStatusChange(true);
       } else {
         onRegistrationStatusChange(false);
       }
@@ -92,7 +98,10 @@ const Register = ({ onRegistrationStatusChange }) => {
         className="image-drop-area"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('file-input').click()}
+        onClick={() => {
+          const input = document.getElementById('file-input');
+          if (input) (input as HTMLInputElement).click();
+        }}
       >
         {image ? (
           <img src={image} alt="Uploaded" className="uploaded-image" />
@@ -106,7 +115,7 @@ const Register = ({ onRegistrationStatusChange }) => {
               onChange={handleImageUpload}
               className="file-input"
               id="file-input"
-              style={{ display: 'none' }} // Hide the default file input
+              style={{ display: 'none' }}
             />
           </div>
         )}

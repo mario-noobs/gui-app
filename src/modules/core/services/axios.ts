@@ -25,7 +25,7 @@ export function HandleError(
 }
 
 const interceptor = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "/api",
+  baseURL: "http://localhost:3000",
   headers: {
     "Content-Type": "application/json",
   },

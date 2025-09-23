@@ -1,4 +1,4 @@
-import { Typography, Card, Button } from "@material-tailwind/react";
+import { Typography, Card } from "@material-tailwind/react";
 
 const Dashboard = () => {
   return (

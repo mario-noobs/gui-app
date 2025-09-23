@@ -54,8 +54,8 @@ const FaceNotification: React.FC<FaceNotificationProps> = ({ notification, onClo
                   </div>
                   <div>
                     <span className="font-medium">Code:</span> {notification.code}
-                    {notification.httpStatus && (
-                        <span className="ml-2">({notification.httpStatus})</span>
+                    {notification.code && (
+                        <span className="ml-2">({notification.code})</span>
                     )}
                   </div>
                   <div>

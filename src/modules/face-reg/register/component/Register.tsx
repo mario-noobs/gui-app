@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MdCloudUpload } from 'react-icons/md';
+import { MdCloudUpload, MdClear } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
 import { IFace } from '../../models/face';
@@ -117,6 +117,12 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
     }
   };
 
+  const handleClearImage = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setImage(null);
+    setFaceData(null);
+  };
+
   if (loading) {
     return <LoadingPage />;
   }
@@ -133,7 +139,12 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
         }}
       >
         {image ? (
-          <img src={image} alt="Uploaded" className="uploaded-image" />
+          <div className="image-preview-container">
+            <img src={image} alt="Uploaded" className="uploaded-image" />
+            <button onClick={handleClearImage} className="clear-button">
+              <MdClear size={24} />
+            </button>
+          </div>
         ) : (
           <div className="upload-icon">
             <MdCloudUpload size={50} />
@@ -149,9 +160,22 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
           </div>
         )}
       </div>
-      <button onClick={handleSubmit} className="submit-button">
-        Submit Data
-      </button>
+      <div className="button-group">
+        <button
+          onClick={handleClearImage}
+          className="submit-button"
+          disabled={!faceData}
+        >
+          Clear Data
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="submit-button"
+          disabled={!faceData}
+        >
+          Submit Data
+        </button>
+      </div>
     </div>
   );
 };

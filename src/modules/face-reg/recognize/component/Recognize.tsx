@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { MdCloudUpload } from 'react-icons/md';
+import { MdCloudUpload, MdClear } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RecognizeFaceBiometricAPI } from '../services/apis';
 import { IFace, IFaceResponse } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
-import { AxiosError } from 'axios';
-import { ErrorResponse, HandleError } from '../../../core/services/axios';
 import { useAuth } from '../../../auth/hooks/useAuth';
-import { useSnackbar } from 'notistack';
+import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
 
 const Recognize = () => {
   const { profile } = useAuth();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
   const [faceData, setFaceData] = useState<IFace | null>(null);
   const [loading, setLoading] = useState(false);
@@ -57,23 +55,41 @@ const Recognize = () => {
     }
   };
 
+  const handleClearImage = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setImage(null);
+    setFaceData(null);
+  };
+
   const handleSubmit = async () => {
     if (faceData) {
       setLoading(true);
       await handleRecognizeBiometric(faceData);
     } else {
-      console.log('No image data available');
+      showNotification({
+        path: '/face/recognize',
+        code: 'CLIENT_ERROR',
+        message: 'No image data available. Please upload an image first.',
+      });
     }
   };
 
   const handleRecognizeBiometric = async (data: IFace) => {
     try {
-      await RecognizeFaceBiometricAPI<IFaceResponse>(data);
-    } catch (error) {
-      enqueueSnackbar(
-        HandleError(error as Error | AxiosError<ErrorResponse>).message,
-        { variant: 'error' }
-      );
+      const response = await RecognizeFaceBiometricAPI(data);
+      const resData = response.data;
+
+      showNotification({
+        path: '/api/v1/face/recognize',
+        code: resData.code,
+        message: resData.message || (resData.code === '0000' ? 'Recognition successful!' : 'Recognition failed'),
+      });
+    } catch (error: any) {
+      showNotification({
+        path: '/api/v1/face/recognize',
+        code: 'SERVER_ERROR',
+        message: error?.message || 'An error occurred during recognition.',
+      });
     } finally {
       setLoading(false);
     }
@@ -94,12 +110,17 @@ const Recognize = () => {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={() => {
-          const input = document.getElementById('file-input');
+          const input = document.getElementById('file-input-recognize');
           if (input) (input as HTMLInputElement).click();
         }}
       >
         {image ? (
-          <img src={image} alt="Uploaded" className="uploaded-image" />
+          <div className="image-preview-container">
+            <img src={image} alt="Uploaded" className="uploaded-image" />
+            <button onClick={handleClearImage} className="clear-button">
+              <MdClear size={24} />
+            </button>
+          </div>
         ) : (
           <div className="upload-icon">
             <MdCloudUpload size={50} />
@@ -109,16 +130,29 @@ const Recognize = () => {
               accept="image/*"
               onChange={handleImageUpload}
               className="file-input"
-              id="file-input"
+              id="file-input-recognize"
               style={{ display: 'none' }}
             />
           </div>
         )}
       </div>
-      <button onClick={handleSubmit} className="submit-button">
-        Submit Data
-      </button>
-      {/* Optionally display faceResponse here */}
+      <div className="button-group">
+        <button
+          onClick={handleClearImage}
+          className="clear-button-main"
+          disabled={!faceData}
+        >
+          <MdClear size={20} />
+          Clear Data
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="submit-button"
+          disabled={!faceData}
+        >
+          Submit Data
+        </button>
+      </div>
     </div>
   );
 };

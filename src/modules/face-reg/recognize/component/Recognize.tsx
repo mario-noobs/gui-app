@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { MdCloudUpload, MdClear } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RecognizeFaceBiometricAPI } from '../services/apis';
-import { IFace, IFaceResponse } from '../../models/face';
+import { IFace } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
+import { ApiResponseWrapper } from '../../utils/notificationHandler';
 
 const Recognize = () => {
   const { profile } = useAuth();
@@ -76,8 +77,8 @@ const Recognize = () => {
 
   const handleRecognizeBiometric = async (data: IFace) => {
     try {
-      const response = await RecognizeFaceBiometricAPI(data);
-      const resData = response.data;
+      const response = await RecognizeFaceBiometricAPI(data) as { data: ApiResponseWrapper };
+      const resData = response.data.data;
 
       showNotification({
         path: '/api/v1/face/recognize',

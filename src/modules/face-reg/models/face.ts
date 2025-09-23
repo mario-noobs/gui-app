@@ -1,44 +1,9 @@
 import { AxiosResponse, AxiosError } from 'axios';
-import { FaceNotificationData } from '../utils/notificationHandler';
+import { FaceNotificationData, ApiResponseWrapper } from '../utils/notificationHandler';
 
 export type IFace = {
-    userId: string
-    imageBase64: string
-  };
-
-export type IFaceResponse = {
-    code: string
-    message: string
-};
-
-export interface ApiResponse {
-  code: string | number;
-  message: string;
-  data?: any;
-}
-
-export const createNotificationFromResponse = (
-    response: AxiosResponse<ApiResponse>,
-    path: string
-): FaceNotificationData => {
-  return {
-    path,
-    code: response.data.code,
-    message: response.data.message,
-    httpStatus: response.status,
-  };
-};
-
-export const createNotificationFromError = (
-    error: AxiosError<ApiResponse>,
-    path: string
-): FaceNotificationData => {
-  return {
-    path,
-    code: error.response?.data?.code || error.response?.status || 'ERROR',
-    message: error.response?.data?.message || error.message || 'Network Error',
-    httpStatus: error.response?.status,
-  };
+    userId: string;
+    imageBase64: string;
 };
 
 export const handleApiCall = async <T>(
@@ -46,14 +11,23 @@ export const handleApiCall = async <T>(
     path: string,
     showNotification: (data: FaceNotificationData) => void
 ): Promise<T | null> => {
-  try {
-    const response = await apiCall();
-    const notificationData = createNotificationFromResponse(response as AxiosResponse<ApiResponse>, path);
-    showNotification(notificationData);
-    return response.data;
-  } catch (error) {
-    const notificationData = createNotificationFromError(error as AxiosError<ApiResponse>, path);
-    showNotification(notificationData);
-    return null;
-  }
+    try {
+        const response = await apiCall();
+        const notificationData: FaceNotificationData = {
+            path,
+            code: (response.data as any)?.code ?? "UNKNOWN",
+            message: (response.data as any)?.message ?? "Unknown response",
+        };
+        showNotification(notificationData);
+        return response.data;
+    } catch (error) {
+        const errorResponse = error as AxiosError<ApiResponseWrapper>;
+        const notificationData: FaceNotificationData = {
+            path,
+            code: errorResponse.response?.data?.data?.code ?? errorResponse.response?.status ?? "ERROR",
+            message: errorResponse.response?.data?.data?.message ?? errorResponse.message ?? "Network Error",
+        };
+        showNotification(notificationData);
+        return null;
+    }
 };

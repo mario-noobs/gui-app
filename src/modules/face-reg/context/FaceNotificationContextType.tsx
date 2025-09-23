@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useFaceNotification } from '../hooks/useFaceNotification';
-import FaceNotification, { FaceNotificationData } from '../components/FaceNotification';
+import FaceNotification from '../components/FaceNotification';
+import { FaceNotificationData } from '../utils/notificationHandler';
 
 interface FaceNotificationContextType {
   showNotification: (data: FaceNotificationData) => void;

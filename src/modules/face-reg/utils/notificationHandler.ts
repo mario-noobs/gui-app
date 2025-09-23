@@ -1,4 +1,4 @@
-import { AxiosResponse, AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 
 export interface FaceNotificationData {
   path: string;
@@ -6,29 +6,40 @@ export interface FaceNotificationData {
   message: string;
 }
 
+export interface ApiResponse {
+  code: string | number;
+  message: string;
+  data?: any;
+}
+
+export interface ApiResponseWrapper {
+  data: ApiResponse;
+}
+
 export const createNotificationFromResponse = (
+  response: ApiResponseWrapper,
+  path: string
 ): FaceNotificationData => {
   return {
     path,
-    code: response.data?.data?.data?.code,
-    message: response.data?.data?.data?.message,
+    code: response.data.code ?? "UNKNOWN",
+    message: response.data.message ?? "Unknown response",
   };
 };
 
 export const createNotificationFromError = (
-    error: AxiosError,
-    path: string
+  error: AxiosError<ApiResponseWrapper>,
+  path: string
 ): FaceNotificationData => {
   return {
     path,
     code:
-        error.response?.data?.data?.data?.code ||
-        error.response?.status ||
-        "ERROR",
+      error.response?.data?.code ??
+      error.response?.status ??
+      "ERROR",
     message:
-        error.response?.data?.data?.data?.message ||
-        error.message ||
-        "Network Error",
+      error.response?.data?.message ??
+      error.message ??
+      "Network Error",
   };
 };
-

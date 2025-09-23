@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import { Loading } from "../../core/components/Loading";
+import { LoadingPage } from "../../core/components/Loading";
 
 interface IPrivateComponentProps {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export const PrivateComponent: React.FC<IPrivateComponentProps> = ({
   const { profile, loading } = useAuth();
 
   if (loading) {
-    return <Loading />;
+    return <LoadingPage />;
   }
 
   if (!profile) {

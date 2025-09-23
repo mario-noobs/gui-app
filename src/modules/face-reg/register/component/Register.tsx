@@ -2,20 +2,31 @@ import React, { useState } from 'react';
 import { MdCloudUpload } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
-import { IFace, IFaceResponse } from '../../models/face';
+import { IFace } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
-import { AxiosError } from 'axios';
-import { ErrorResponse, HandleError } from '../../../core/services/axios';
 import { useAuth } from '../../../auth/hooks/useAuth';
-import { useSnackbar } from 'notistack';
+import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
 
 interface RegisterProps {
   onRegistrationStatusChange: (status: boolean) => void;
 }
 
+interface RegisterFaceResponseData {
+  code: string;
+  message: string;
+  userId?: string;
+  requestId?: string;
+  data?: {
+    name?: string;
+    probability?: number | null;
+    created_at?: string;
+    image?: string | null;
+  };
+}
+
 const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
   const { profile } = useAuth();
-  const { enqueueSnackbar } = useSnackbar();
+  const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
   const [faceData, setFaceData] = useState<IFace | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,25 +75,43 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
   const handleSubmit = async () => {
     if (faceData) {
       setLoading(true);
-      await HandleRegisterBiometric(faceData);
+      await handleRegisterBiometric(faceData);
     } else {
-      console.log('No image data available');
+      showNotification({
+        path: '/face/register',
+        code: 'CLIENT_ERROR',
+        message: 'No image data available. Please upload an image first.',
+      });
     }
   };
 
-  const HandleRegisterBiometric = async (data: IFace) => {
+  const handleRegisterBiometric = async (data: IFace) => {
+    setLoading(true);
     try {
-      const result = await RegisterFaceBiometricAPI<IFaceResponse>(data);
-      if (result.code === "0000") {
+      const response = await RegisterFaceBiometricAPI<{ data: RegisterFaceResponseData }>(data);
+      const resData = response.data;
+      if (resData.code === "0000") {
+        showNotification({
+          path: '/api/v1/face/register-identity',
+          code: resData.code,
+          message: resData.message || 'Registration successful!',
+        });
         onRegistrationStatusChange(true);
       } else {
+        showNotification({
+          path: '/api/v1/face/register-identity',
+          code: resData.code,
+          message: resData.message || 'Registration failed.',
+        });
         onRegistrationStatusChange(false);
       }
-    } catch (error) {
-      enqueueSnackbar(
-        HandleError(error as Error | AxiosError<ErrorResponse>).message,
-        { variant: 'error' }
-      );
+    } catch (error: any) {
+      showNotification({
+        path: '/api/v1/face/register-identity',
+        code: 'SERVER_ERROR',
+        message: error?.message || 'An error occurred during registration.',
+      });
+      onRegistrationStatusChange(false);
     } finally {
       setLoading(false);
     }

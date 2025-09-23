@@ -2,6 +2,7 @@ import { Outlet, Route, Routes } from "react-router-dom";
 import { AuthLayout } from "../../auth/components/AuthLayout";
 import LoginForm from "../../auth/components/LoginUI";
 import { RegisterUI } from "../../auth/components/RegisterUI";
+import { PrivateComponent } from "../../auth/components/PrivateComponent";
 
 import PageNotFound from "./PageNotFound";
 import { MainLayout } from "./MainLayout";
@@ -25,16 +26,16 @@ export const MainRouter = () => {
       <Route
         path="/"
         element={
-          // <PrivateComponent>
+          <PrivateComponent>
             <MainLayout>
-                <div className="flex">
-                  <DefaultSidebar />
+              <div className="flex">
+                <DefaultSidebar />
                 <div className="flex-1">
-              <Outlet />
+                  <Outlet />
                 </div>
               </div>
             </MainLayout>
-          // </PrivateComponent>
+          </PrivateComponent>
         }
       >
         <Route path="/" element={<Dashboard />} />

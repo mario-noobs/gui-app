@@ -34,11 +34,11 @@ export const createNotificationFromError = (
   return {
     path,
     code:
-      error.response?.data?.code ??
+      error.response?.data?.data?.code ??
       error.response?.status ??
       "ERROR",
     message:
-      error.response?.data?.message ??
+      error.response?.data?.data?.message ??
       error.message ??
       "Network Error",
   };

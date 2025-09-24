@@ -10,6 +10,7 @@ import { DefaultSidebar } from "../../home/Sidebar";
 import Dashboard from "../../home/pages/Dashboard";
 import ECommerce from "../../home/pages/ECommerce";
 import Profile from "../../home/pages/Profile";
+import { Audit } from "../../home/pages/Audit";
 import FaceControlPage from "../../face-reg/components/FaceHome";
 import Register from "../../face-reg/register/component/Register";
 import Recognize from "../../face-reg/recognize/component/Recognize";
@@ -41,6 +42,7 @@ export const MainRouter = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/audit" element={<Audit />} />
         <Route path="/face-regconize" element={<FaceControlPage />}>
           <Route path="register" element={<Register />} />
           <Route path="recognize" element={<Recognize />} />

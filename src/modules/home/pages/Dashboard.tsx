@@ -4,22 +4,27 @@ import { useNavigate } from "react-router-dom";
 
 const aiServices = [
   {
-    title: "Face Detection",
+    title: "Face Detection & Recognition",
     description: "Advanced AI-powered face detection with high accuracy and real-time processing",
     image: "/images/face-detection.jpg",
-    link: "/face-reg"
+    link: "/face-regconize",
+    isAvailable: true
   },
   {
     title: "Facemask Detection",
-    description: "Ensure safety compliance with our automated facemask detection system",
+    description: "AI-powered safety compliance system that automatically detects whether individuals are wearing face masks in real-time video streams and images",
     image: "/images/facemask-detection.jpg",
-    link: "/face-reg"
+    link: "/face-mask",
+    isAvailable: false,
+    comingSoon: true
   },
   {
     title: "OCR Technology",
-    description: "Convert images and documents to editable text with our powerful OCR solution",
+    description: "Optical Character Recognition system that extracts and converts text from images, documents, and scanned files into editable digital format",
     image: "/images/ocr.jpg",
-    link: "/services/ocr"
+    link: "/services/ocr",
+    isAvailable: false,
+    comingSoon: true
   }
 ];
 
@@ -103,21 +108,38 @@ export const Dashboard = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group cursor-pointer transform hover:-translate-y-2"
-                onClick={() => handleServiceClick(service.link)}
+                className={`bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 border border-gray-100 group transform ${
+                  service.isAvailable 
+                    ? 'hover:shadow-2xl cursor-pointer hover:-translate-y-2' 
+                    : 'opacity-75 cursor-not-allowed'
+                }`}
+                onClick={() => service.isAvailable && handleServiceClick(service.link)}
               >
                 <div className="relative overflow-hidden">
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className={`h-40 w-full object-cover transition-transform duration-300 ${
+                      service.isAvailable ? 'group-hover:scale-110' : 'grayscale'
+                    }`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent transition-opacity duration-300 ${
+                    service.isAvailable ? 'opacity-0 group-hover:opacity-100' : 'opacity-30'
+                  }`} />
+                  {service.comingSoon && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                      🚀 Coming Soon
+                    </div>
+                  )}
                 </div>
                 <div className="p-5">
                   <Typography
                     variant="h5"
-                    className="text-gray-800 mb-2 font-bold text-lg group-hover:text-blue-600 transition-colors"
+                    className={`mb-2 font-bold text-lg transition-colors ${
+                      service.isAvailable 
+                        ? 'text-gray-800 group-hover:text-blue-600' 
+                        : 'text-gray-500'
+                    }`}
                   >
                     {service.title}
                   </Typography>
@@ -126,13 +148,20 @@ export const Dashboard = () => {
                   </Typography>
                   <Button 
                     size="sm"
-                    className="bg-blue-500 hover:bg-blue-600 transition-all duration-300 w-full transform group-hover:scale-105"
+                    className={`w-full transition-all duration-300 ${
+                      service.isAvailable
+                        ? 'bg-blue-500 hover:bg-blue-600 transform group-hover:scale-105'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleServiceClick(service.link);
+                      if (service.isAvailable) {
+                        handleServiceClick(service.link);
+                      }
                     }}
+                    disabled={!service.isAvailable}
                   >
-                    Try Now →
+                    {service.comingSoon ? '🔜 Coming Soon' : 'Try Now →'}
                   </Button>
                 </div>
               </motion.div>
@@ -327,3 +356,4 @@ export const Dashboard = () => {
 };
 
 export default Dashboard;
+

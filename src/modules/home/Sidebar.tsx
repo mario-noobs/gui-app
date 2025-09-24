@@ -9,7 +9,7 @@ import {
 import {
   PresentationChartBarIcon,
   UserCircleIcon,
-  Cog6ToothIcon,
+  DocumentTextIcon,
   PowerIcon,
   FaceSmileIcon,
 } from "@heroicons/react/24/solid";
@@ -34,7 +34,7 @@ export function DefaultSidebar() {
       label: "Face Recognition",
       icon: <FaceSmileIcon className="h-5 w-5" />,
       path: "/face-regconize",
-      badge: "AI",
+      badge: "Beta",
       color: "green",
     },
     {
@@ -45,18 +45,10 @@ export function DefaultSidebar() {
       color: "purple",
     },
     {
-      label: "Settings",
-      icon: <Cog6ToothIcon className="h-5 w-5" />,
-      path: "/settings",
-      badge: null,
+      label: "Audit",
+      icon: <DocumentTextIcon className="h-5 w-5" />,
+      path: "/audit",
       color: "orange",
-    },
-    {
-      label: "Log Out",
-      icon: <PowerIcon className="h-5 w-5" />,
-      path: "/logout",
-      badge: null,
-      color: "red",
     },
   ];
 

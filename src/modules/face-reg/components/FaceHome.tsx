@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faUserCheck, faUserMinus } from '@fortawesome/free-solid-svg-icons';
@@ -14,6 +14,33 @@ const FaceControlPage = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { showNotification } = useFaceNotificationContext();
+
+  // Check if the user is already registered when the component mounts
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (profile?.last_name) {
+        setIsLoading(true);
+        try {
+          const response = await axios.get(`/api/v1/face/identity/${profile.last_name}`);
+          const resData = response.data;
+
+          if (resData.code === "0000" && resData.data) {
+            setIsRegistered(true);
+          } else {
+            setIsRegistered(false);
+          }
+        } catch (error) {
+          // If there's an error, assume the user is not registered
+          setIsRegistered(false);
+          console.error('Error checking registration status:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkRegistrationStatus();
+  }, [profile?.last_name]);
 
   const handleRegistrationStatusChange = (registered: boolean) => {
     setIsRegistered(registered);

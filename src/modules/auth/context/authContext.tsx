@@ -18,6 +18,7 @@ import { IResponse } from "../../core/models/core";
 import { useSnackbar } from "notistack";
 import LoadingPage from "../../core/components/Loading";
 import { GetProfileAPI } from "../../home/services/api";
+import { saveJwtSubToLocalStorage } from "../utils/jwtUtils";
 
 type AuthContextType = {
   profile: IProfile | null;
@@ -99,6 +100,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .then((res) => {
         const token = res.data.access_token.token;
         localStorage.setItem("access_token", token);
+
+        // Save the JWT subject (user ID) to localStorage for easy access
+        saveJwtSubToLocalStorage(token);
       })
       .then(async () => {
         await handleGetProfile();

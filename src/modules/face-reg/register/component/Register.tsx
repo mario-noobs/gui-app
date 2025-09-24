@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { MdCloudUpload, MdClear } from 'react-icons/md';
+import { useOutletContext } from 'react-router-dom';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
 import { IFace } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
+import { getJwtUserId } from '../../../auth/utils/jwtUtils';
 
-interface RegisterProps {
+interface RegisterContextType {
   onRegistrationStatusChange: (status: boolean) => void;
 }
 
@@ -24,12 +26,25 @@ interface RegisterFaceResponseData {
   };
 }
 
-const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
+const Register = () => {
+  const { onRegistrationStatusChange } = useOutletContext<RegisterContextType>();
   const { profile } = useAuth();
   const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
   const [faceData, setFaceData] = useState<IFace | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Get JWT subject (user ID) once on component mount
+  const jwtUserId = React.useMemo(() => {
+    // First try to get from localStorage
+    const storedUserId = localStorage.getItem('jwt_user_id');
+    if (storedUserId) return storedUserId;
+
+    // If not in localStorage, try to extract from token
+    return getJwtUserId() || `user-${profile?.id || 'unknown'}`;
+  }, [profile]);
+
+  console.log("Register", profile);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,7 +55,7 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
           const base64String = reader.result.split(',')[1];
           setImage(reader.result);
           setFaceData({
-            userId: profile?.last_name || "None",
+            userId: jwtUserId, // Using JWT user ID instead of profile.id
             imageBase64: base64String
           });
         }
@@ -63,7 +78,7 @@ const Register = ({ onRegistrationStatusChange }: RegisterProps) => {
           const base64String = reader.result.split(',')[1];
           setImage(reader.result);
           setFaceData({
-            userId: profile?.last_name || "None",
+            userId: jwtUserId, // Using JWT user ID instead of profile.id
             imageBase64: base64String
           });
         }

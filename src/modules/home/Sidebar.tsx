@@ -1,6 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  Card,
   Typography,
   List,
   ListItem,
@@ -62,7 +61,7 @@ export function DefaultSidebar() {
   ];
 
   return (
-    <Card className="h-full w-full max-w-[18rem] shadow-xl bg-white border-0">
+    <div className="h-full w-[18rem] min-w-[18rem] shadow-xl bg-white border-r border-gray-100">
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -80,13 +79,13 @@ export function DefaultSidebar() {
               Navigation
             </Typography>
             <Typography className="text-gray-500 text-sm">
-              AI Face Recognition App
+              Main Menu
             </Typography>
           </motion.div>
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-y-auto">
           <List className="space-y-2">
             {navItems.map((item, index) => (
               <motion.div
@@ -192,6 +191,6 @@ export function DefaultSidebar() {
           </div>
         </motion.div>
       </motion.div>
-    </Card>
+    </div>
   );
 }

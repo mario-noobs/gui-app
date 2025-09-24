@@ -28,9 +28,9 @@ export const MainRouter = () => {
         element={
           <PrivateComponent>
             <MainLayout>
-              <div className="flex">
+              <div className="flex w-full overflow-hidden">
                 <DefaultSidebar />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0 w-full overflow-hidden">
                   <Outlet />
                 </div>
               </div>

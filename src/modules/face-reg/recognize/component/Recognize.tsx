@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { MdClear } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RecognizeFaceBiometricAPI } from '../services/apis';
 import { IFace } from '../../models/face';

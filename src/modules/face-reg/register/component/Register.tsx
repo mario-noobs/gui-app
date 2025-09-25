@@ -12,19 +12,6 @@ interface RegisterContextType {
   onRegistrationStatusChange: (status: boolean) => void;
 }
 
-interface RegisterFaceResponseData {
-  code: string;
-  message: string;
-  userId?: string;
-  requestId?: string;
-  data?: {
-    name?: string;
-    probability?: number | null;
-    created_at?: string;
-    image?: string | null;
-  };
-}
-
 const Register = () => {
   const navigate = useNavigate();
   const { onRegistrationStatusChange } = useOutletContext<RegisterContextType>();
@@ -71,7 +58,7 @@ const Register = () => {
       const response = await RegisterFaceBiometricAPI({
         userId: jwtUserId, // Using JWT user ID instead of profile.id
         imageBase64: base64
-      });
+      }) as { data: any };
       const resData = response.data;
       if (resData.code === '0000') {
         showNotification({

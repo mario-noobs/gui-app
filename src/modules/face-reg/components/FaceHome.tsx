@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../context/FaceNotificationContextType';
 import apiClient from '../services/axios';
 import { getJwtUserId } from '../../auth/utils/jwtUtils';
+import { FaceRegContext } from './ProtectedRoute';
 
 const FaceControlPage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -47,11 +48,27 @@ const FaceControlPage = () => {
   };
 
   const handleRegisterClick = () => {
-    navigate('register');
+    if (!isRegistered) {
+      navigate('register');
+    } else {
+      showNotification({
+        path: '/face/register',
+        code: 'ALREADY_REGISTERED',
+        message: 'You are already registered. Cannot register again.',
+      });
+    }
   };
 
   const handleRecognizeClick = () => {
-    navigate('recognize');
+    if (isRegistered) {
+      navigate('recognize');
+    } else {
+      showNotification({
+        path: '/face/recognize',
+        code: 'NOT_REGISTERED',
+        message: 'You must register before you can recognize.',
+      });
+    }
   };
 
   const handleRemoveClick = async () => {
@@ -87,6 +104,7 @@ const FaceControlPage = () => {
   };
 
   return (
+    <FaceRegContext.Provider value={{ isRegistered, setIsRegistered }}>
       <div className="w-full min-h-screen flex flex-col bg-gray-50">
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -204,15 +222,14 @@ const FaceControlPage = () => {
 
                 {/* Outlet / Content Area */}
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 min-h-[400px]">
-                  <Outlet
-                      context={{ onRegistrationStatusChange: handleRegistrationStatusChange }}
-                  />
+                  <Outlet />
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
+    </FaceRegContext.Provider>
   );
 };
 

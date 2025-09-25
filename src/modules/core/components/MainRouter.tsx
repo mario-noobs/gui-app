@@ -14,6 +14,7 @@ import { Audit } from "../../home/pages/Audit";
 import FaceControlPage from "../../face-reg/components/FaceHome";
 import Register from "../../face-reg/register/component/Register";
 import Recognize from "../../face-reg/recognize/component/Recognize";
+import FaceRegRouteGuard from '../../face-reg/components/FaceRegRouteGuard';
 
 export const MainRouter = () => {
   return (
@@ -44,8 +45,12 @@ export const MainRouter = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/audit" element={<Audit />} />
         <Route path="/face-regconize" element={<FaceControlPage />}>
-          <Route path="register" element={<Register />} />
-          <Route path="recognize" element={<Recognize />} />
+          <Route element={<FaceRegRouteGuard type="register" />}>
+            <Route path="register" element={<Register />} />
+          </Route>
+          <Route element={<FaceRegRouteGuard type="recognize" />}>
+            <Route path="recognize" element={<Recognize />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

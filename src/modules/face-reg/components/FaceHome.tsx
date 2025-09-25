@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../context/FaceNotificationContextType';
 import apiClient from '../services/axios';
+import { getJwtUserId } from '../../auth/utils/jwtUtils';
 
 const FaceControlPage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -18,19 +19,18 @@ const FaceControlPage = () => {
   // Check if the user is already registered when the component mounts
   useEffect(() => {
     const checkRegistrationStatus = async () => {
-      if (profile?.last_name) {
+      const jwtUserId = getJwtUserId();
+      if (jwtUserId) {
         setIsLoading(true);
         try {
-          const response = await apiClient.get(`/api/v1/face/identity/${profile.last_name}`);
+          const response = await apiClient.get(`/api/v1/face/is-registered?userId=${jwtUserId}`);
           const resData = response.data;
-
-          if (resData.code === "0000" && resData.data) {
+          if (resData.registered === true) {
             setIsRegistered(true);
           } else {
             setIsRegistered(false);
           }
         } catch (error) {
-          // If there's an error, assume the user is not registered
           setIsRegistered(false);
           console.error('Error checking registration status:', error);
         } finally {
@@ -40,7 +40,7 @@ const FaceControlPage = () => {
     };
 
     checkRegistrationStatus();
-  }, [profile?.last_name]);
+  }, [profile]);
 
   const handleRegistrationStatusChange = (registered: boolean) => {
     setIsRegistered(registered);
@@ -217,4 +217,3 @@ const FaceControlPage = () => {
 };
 
 export default FaceControlPage;
-

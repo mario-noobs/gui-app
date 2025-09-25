@@ -13,6 +13,7 @@ import {
   FaceSmileIcon,
 } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";
+import { HiOutlineMenuAlt2 } from "react-icons/hi";
 
 export function DefaultSidebar() {
   const location = useLocation();
@@ -59,19 +60,28 @@ export function DefaultSidebar() {
         transition={{ duration: 0.6 }}
         className="h-full flex flex-col"
       >
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100">
+        {/* Sidebar Header - Modernized */}
+        <div className="p-0 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex items-center gap-3 px-6 py-5"
           >
-            <Typography variant="h5" className="text-gray-800 font-bold mb-1">
-              Navigation
-            </Typography>
-            <Typography className="text-gray-500 text-sm">
-              Main Menu
-            </Typography>
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-400 to-purple-400 shadow-md">
+              <HiOutlineMenuAlt2 className="text-white text-xl" />
+            </span>
+            <div>
+              <Typography
+                variant="h5"
+                className="text-gray-800 font-extrabold text-lg tracking-wide mb-0.5"
+              >
+                Navigation
+              </Typography>
+              <Typography className="text-purple-500 text-xs font-semibold uppercase tracking-wider">
+                Main Menu
+              </Typography>
+            </div>
           </motion.div>
         </div>
 

@@ -1,9 +1,25 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { LogOutIcon, UserCircleIcon, BellIcon, ChevronDownIcon, Sparkles, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../../../assets/logo.svg";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { motion } from "framer-motion";
+import Logo from "../../../assets/logo.svg";
+
+// Modern SVG logo (replace with your own if desired)
+const ModernLogo = () => (
+  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="22" r="22" fill="url(#paint0_linear)"/>
+    <path d="M14 28C14 22 30 22 30 28" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+    <circle cx="17.5" cy="18.5" r="2.5" fill="#fff"/>
+    <circle cx="26.5" cy="18.5" r="2.5" fill="#fff"/>
+    <defs>
+      <linearGradient id="paint0_linear" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#7C3AED"/>
+        <stop offset="1" stopColor="#38BDF8"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 export const Header: React.FC = () => {
   const { profile, handleLogout } = useAuth();
@@ -41,15 +57,15 @@ export const Header: React.FC = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 px-6 py-4 shadow-2xl border-b border-purple-500/20"
+      className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 px-0 py-3 shadow-2xl border-b border-purple-500/20 w-full"
     >
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-visible">
         <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -top-1/4 -left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex justify-between items-center relative z-10">
+      <div className="w-full flex justify-between items-center relative z-10 px-8 max-w-full">
         {/* Left side - Logo and Navigation */}
         <div className="flex items-center space-x-10">
           <motion.button
@@ -60,18 +76,13 @@ export const Header: React.FC = () => {
             type="button"
           >
             <div className="relative">
-              <img
-                src={Logo}
-                alt="AI Platform Logo"
-                className="h-12 w-auto filter brightness-0 invert group-hover:drop-shadow-[0_0_10px_rgba(147,51,234,0.5)] transition-all duration-300"
-              />
+              <ModernLogo />
               <div className="absolute -inset-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg opacity-0 group-hover:opacity-20 blur transition-all duration-300"></div>
             </div>
             <div className="hidden lg:block">
-              <h1 className="text-white font-bold text-xl bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <h1 className="text-white font-bold text-2xl bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent tracking-wide">
                 AI Platform
               </h1>
-              <p className="text-purple-300 text-xs">Advanced Solutions</p>
             </div>
           </motion.button>
 
@@ -98,56 +109,56 @@ export const Header: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
               </MenuButton>
 
-              <MenuItems className="absolute left-0 mt-3 w-96 origin-top-left rounded-2xl bg-slate-800/95 backdrop-blur-xl border border-purple-500/20 shadow-2xl ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden">
-                <div className="p-2">
-                  <div className="px-4 py-3 border-b border-purple-500/20">
-                    <h3 className="text-white font-semibold text-sm">AI Services</h3>
-                    <p className="text-purple-300 text-xs mt-1">Choose your AI solution</p>
+              <MenuItems className="absolute left-0 mt-3 w-96 origin-top-left rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-purple-200/60 shadow-2xl ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden p-0">
+                <div className="p-5">
+                  <div className="mb-3">
+                    <h3 className="text-slate-900 dark:text-white font-bold text-lg mb-1 flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-purple-500" />
+                      AI Services
+                    </h3>
+                    <p className="text-purple-500 text-xs">AI-powered solutions for tomorrow</p>
                   </div>
-                  {services.map((service) => (
-                    <MenuItem key={service.name}>
-                      {({ focus }) => (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          onClick={() => {
-                            if (service.isAvailable) {
-                              navigate(service.link);
-                            }
-                          }}
-                          disabled={!service.isAvailable}
-                          className={`${
-                            focus && service.isAvailable ? 'bg-slate-700/50' : ''
-                          } ${
-                            !service.isAvailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
-                          } group flex w-full items-start p-4 text-sm transition-all duration-200 rounded-xl m-1`}
-                        >
-                          <div className="flex items-start space-x-4 w-full">
-                            <div className={`p-2 rounded-lg bg-gradient-to-r ${service.gradient} text-white text-lg shadow-lg`}>
+                  <div className="border-b border-purple-100/60 mb-2" />
+                  <div className="flex flex-col gap-2">
+                    {services.map((service) => (
+                      <MenuItem key={service.name}>
+                        {({ focus }) => (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            onClick={() => {
+                              if (service.isAvailable) {
+                                navigate(service.link);
+                              }
+                            }}
+                            disabled={!service.isAvailable}
+                            className={`
+                              flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200
+                              ${focus && service.isAvailable ? 'bg-purple-100/60 dark:bg-slate-800/60' : ''}
+                              ${!service.isAvailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+                              group
+                            `}
+                          >
+                            <span className={`p-2 rounded-lg bg-gradient-to-r ${service.gradient} text-white text-lg shadow-lg flex items-center justify-center`}>
                               {service.icon}
-                            </div>
-                            <div className="flex-1 text-left">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className={`font-medium text-sm ${service.isAvailable ? 'text-white' : 'text-gray-400'}`}>
-                                  {service.name}
-                                </span>
-                                {!service.isAvailable && (
-                                  <span className="text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full font-semibold shadow-lg">
-                                    🚀 Coming Soon
-                                  </span>
-                                )}
-                                {service.isAvailable && (
-                                  <span className="text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full font-semibold shadow-lg">
-                                    ✨ Live
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-purple-300 leading-relaxed">{service.description}</p>
-                            </div>
-                          </div>
-                        </motion.button>
-                      )}
-                    </MenuItem>
-                  ))}
+                            </span>
+                            <span className="flex-1 text-left">
+                              <span className={`block font-semibold text-base ${service.isAvailable ? 'text-slate-900 dark:text-white' : 'text-gray-400'}`}>{service.name}</span>
+                              <span className="block text-xs text-purple-500 dark:text-purple-300 mt-0.5">{service.description}</span>
+                            </span>
+                            {service.isAvailable ? (
+                              <span className="text-xs bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1 rounded-full font-semibold shadow-md ml-2">
+                                ✨ Live
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full font-semibold shadow-md ml-2">
+                                🚀 Coming Soon
+                              </span>
+                            )}
+                          </motion.button>
+                        )}
+                      </MenuItem>
+                    ))}
+                  </div>
                 </div>
               </MenuItems>
             </Menu>

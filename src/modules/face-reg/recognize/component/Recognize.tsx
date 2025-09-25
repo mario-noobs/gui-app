@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdCloudUpload, MdClear } from 'react-icons/md';
+import { MdClear } from 'react-icons/md';
 import '../style/UploadStyles.css';
 import { RecognizeFaceBiometricAPI } from '../services/apis';
 import { IFace } from '../../models/face';
@@ -8,12 +8,13 @@ import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
 import MatchIndicator from './MatchIndicator';
 import { getJwtUserId } from '../../../auth/utils/jwtUtils';
+import UploadForm from '../../components/UploadForm';
 
 const Recognize = () => {
   const { profile } = useAuth();
   const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
-  const [faceData, setFaceData] = useState<IFace | null>(null);
+  const [base64, setBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [recognitionResult, setRecognitionResult] = useState<{
     name: string;
@@ -32,51 +33,19 @@ const Recognize = () => {
     return getJwtUserId() || `user-${profile?.id || 'unknown'}`;
   }, [profile]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1];
-          setImage(reader.result);
-          setFaceData({
-            userId: jwtUserId, // Using JWT user ID instead of profile.id
-            imageBase64: base64String
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1];
-          setImage(reader.result);
-          setFaceData({
-            userId: jwtUserId, // Using JWT user ID instead of profile.id
-            imageBase64: base64String
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageChange = (img: string | null, b64: string | null) => {
+    setImage(img);
+    setBase64(b64);
+    setRecognitionResult(null);
   };
 
   const handleSubmit = async () => {
-    if (faceData) {
+    if (base64) {
       setLoading(true);
-      await handleRecognizeBiometric(faceData);
+      await handleRecognizeBiometric({
+        userId: jwtUserId, // Using JWT user ID instead of profile.id
+        imageBase64: base64
+      });
     } else {
       showNotification({
         path: '/face/recognize',
@@ -91,7 +60,7 @@ const Recognize = () => {
     try {
       const response = await RecognizeFaceBiometricAPI(data) as { data: any };
       const resData = response.data;
-
+      console.log("RecognizeFaceBiometricAPI", resData);
       if (resData.code === "0000") {
         const recognitionDetails = resData.data;
         const isUserMatch = recognitionDetails?.name === jwtUserId;
@@ -134,13 +103,13 @@ const Recognize = () => {
   const handleClearImage = (event: React.MouseEvent) => {
     event.stopPropagation();
     setImage(null);
-    setFaceData(null);
+    setBase64(null);
     setRecognitionResult(null);
   };
 
   useEffect(() => {
     // This effect can be used to react to faceData changes if necessary
-  }, [faceData]);
+  }, [base64]);
 
   if (loading) {
     return <LoadingPage />;
@@ -152,76 +121,12 @@ const Recognize = () => {
       width: '800px',
       margin: '0 auto'
     }}>
-      <div
-        className="image-drop-area"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => {
-          const input = document.getElementById('file-input');
-          if (input) (input as HTMLInputElement).click();
-        }}
-        style={{
-          width: '100%',
-          minHeight: '300px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
-        {image ? (
-          <div className="image-preview-container" style={{
-            width: '100%',
-            maxHeight: '500px',
-            display: 'flex',
-            justifyContent: 'center',
-            position: 'relative'
-          }}>
-            <img
-              src={image}
-              alt="Uploaded"
-              className="uploaded-image"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '500px',
-                objectFit: 'contain'
-              }}
-            />
-            <button
-              onClick={handleClearImage}
-              className="clear-button"
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'rgba(255,255,255,0.8)',
-                borderRadius: '50%',
-                width: '30px',
-                height: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <MdClear size={24} />
-            </button>
-          </div>
-        ) : (
-          <div className="upload-icon" style={{ textAlign: 'center', padding: '20px' }}>
-            <MdCloudUpload size={50} />
-            <p>Drag & drop an image here or click to upload</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="file-input"
-              id="file-input"
-              style={{ display: 'none' }}
-            />
-          </div>
-        )}
-      </div>
+      <UploadForm
+        image={image}
+        loading={loading}
+        onImageChange={handleImageChange}
+        buttonText="Drag & drop or click to upload your face image for recognition"
+      />
 
       {/* Enhanced Recognition Results display */}
       {recognitionResult && (
@@ -367,7 +272,7 @@ const Recognize = () => {
         <button
           onClick={handleClearImage}
           className="submit-button"
-          disabled={!faceData}
+          disabled={!base64}
           style={{
             flex: 1,
             padding: '12px 20px'
@@ -378,13 +283,13 @@ const Recognize = () => {
         <button
           onClick={handleSubmit}
           className="submit-button"
-          disabled={!faceData}
+          disabled={!base64 || loading}
           style={{
             flex: 1,
             padding: '12px 20px'
           }}
         >
-          Submit Data
+          Recognize Face
         </button>
       </div>
     </div>

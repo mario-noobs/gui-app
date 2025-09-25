@@ -67,6 +67,7 @@ const FaceControlPage = () => {
           message: resData.message || 'Identity removed successfully!',
         });
         setIsRegistered(false);
+        navigate('register'); // Navigate to register after successful removal
       } else {
         showNotification({
           path: '/api/v1/face/delete-identity',

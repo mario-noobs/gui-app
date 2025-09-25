@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { MdCloudUpload, MdClear } from 'react-icons/md';
-import { useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
-import { IFace } from '../../models/face';
 import LoadingPage from '../../../core/components/Loading';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
 import { getJwtUserId } from '../../../auth/utils/jwtUtils';
+import UploadForm from '../../components/UploadForm';
 
 interface RegisterContextType {
   onRegistrationStatusChange: (status: boolean) => void;
@@ -27,11 +26,12 @@ interface RegisterFaceResponseData {
 }
 
 const Register = () => {
+  const navigate = useNavigate();
   const { onRegistrationStatusChange } = useOutletContext<RegisterContextType>();
   const { profile } = useAuth();
   const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
-  const [faceData, setFaceData] = useState<IFace | null>(null);
+  const [base64, setBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Get JWT subject (user ID) once on component mount
@@ -46,96 +46,59 @@ const Register = () => {
 
   console.log("Register", profile);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1];
-          setImage(reader.result);
-          setFaceData({
-            userId: jwtUserId, // Using JWT user ID instead of profile.id
-            imageBase64: base64String
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1];
-          setImage(reader.result);
-          setFaceData({
-            userId: jwtUserId, // Using JWT user ID instead of profile.id
-            imageBase64: base64String
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (faceData) {
-      setLoading(true);
-      await handleRegisterBiometric(faceData);
-    } else {
-      showNotification({
-        path: '/face/register',
-        code: 'CLIENT_ERROR',
-        message: 'No image data available. Please upload an image first.',
-      });
-    }
-  };
-
-  const handleRegisterBiometric = async (data: IFace) => {
-    setLoading(true);
-    try {
-      const response = await RegisterFaceBiometricAPI<{ data: RegisterFaceResponseData }>(data);
-      const resData = response.data;
-      if (resData.code === "0000") {
-        showNotification({
-          path: '/api/v1/face/register-identity',
-          code: resData.code,
-          message: resData.message || 'Registration successful!',
-        });
-        onRegistrationStatusChange(true);
-      } else {
-        showNotification({
-          path: '/api/v1/face/register-identity',
-          code: resData.code,
-          message: resData.message || 'Registration failed.',
-        });
-        onRegistrationStatusChange(false);
-      }
-    } catch (error: any) {
-      showNotification({
-        path: '/api/v1/face/register-identity',
-        code: 'SERVER_ERROR',
-        message: error?.message || 'An error occurred during registration.',
-      });
-      onRegistrationStatusChange(false);
-    } finally {
-      setLoading(false);
-    }
+  const handleImageChange = (img: string | null, b64: string | null) => {
+    setImage(img);
+    setBase64(b64);
   };
 
   const handleClearImage = (event: React.MouseEvent) => {
     event.stopPropagation();
     setImage(null);
-    setFaceData(null);
+    setBase64(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!base64) {
+      showNotification({
+        path: '/api/v1/face/register',
+        code: 'CLIENT_ERROR',
+        message: 'Please upload an image before submitting.',
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await RegisterFaceBiometricAPI({
+        userId: jwtUserId, // Using JWT user ID instead of profile.id
+        imageBase64: base64
+      });
+      const resData = response.data;
+      if (resData.code === '0000') {
+        showNotification({
+          path: '/api/v1/face/register',
+          code: resData.code,
+          message: resData.message || 'Registration successful!',
+        });
+        setImage(null);
+        setBase64(null);
+        onRegistrationStatusChange(true);
+        navigate('/face-regconize/recognize');
+      } else {
+        showNotification({
+          path: '/api/v1/face/register',
+          code: resData.code,
+          message: resData.message || 'Registration failed.',
+        });
+      }
+    } catch (error: any) {
+      showNotification({
+        path: '/api/v1/face/register',
+        code: 'SERVER_ERROR',
+        message: error?.message || 'An error occurred during registration.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -144,51 +107,28 @@ const Register = () => {
 
   return (
     <div className="upload-container">
-      <div
-        className="image-drop-area"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => {
-          const input = document.getElementById('file-input');
-          if (input) (input as HTMLInputElement).click();
-        }}
-      >
-        {image ? (
-          <div className="image-preview-container">
-            <img src={image} alt="Uploaded" className="uploaded-image" />
-            <button onClick={handleClearImage} className="clear-button">
-              <MdClear size={24} />
-            </button>
-          </div>
-        ) : (
-          <div className="upload-icon">
-            <MdCloudUpload size={50} />
-            <p>Drag & drop an image here or click to upload</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="file-input"
-              id="file-input"
-              style={{ display: 'none' }}
-            />
-          </div>
-        )}
-      </div>
-      <div className="button-group">
+      <UploadForm
+        image={image}
+        loading={loading}
+        onImageChange={handleImageChange}
+        buttonText="Drag & drop or click to upload your face image for registration"
+      />
+      <div className="button-group" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '20px', gap: '15px' }}>
         <button
           onClick={handleClearImage}
           className="submit-button"
-          disabled={!faceData}
+          disabled={!base64}
+          style={{ flex: 1, padding: '12px 20px' }}
         >
           Clear Data
         </button>
         <button
-          onClick={handleSubmit}
           className="submit-button"
-          disabled={!faceData}
+          onClick={handleSubmit}
+          disabled={!base64 || loading}
+          style={{ flex: 1, padding: '12px 20px' }}
         >
-          Submit Data
+          Register Face
         </button>
       </div>
     </div>

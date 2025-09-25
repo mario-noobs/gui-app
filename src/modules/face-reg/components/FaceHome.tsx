@@ -42,11 +42,7 @@ const FaceControlPage = () => {
 
     checkRegistrationStatus();
   }, [profile]);
-
-  const handleRegistrationStatusChange = (registered: boolean) => {
-    setIsRegistered(registered);
-  };
-
+  
   const handleRegisterClick = () => {
     if (!isRegistered) {
       navigate('register');

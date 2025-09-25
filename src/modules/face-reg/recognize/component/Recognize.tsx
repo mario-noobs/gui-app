@@ -89,7 +89,7 @@ const Recognize = () => {
   const handleRecognizeBiometric = async (data: IFace) => {
     setLoading(true);
     try {
-      const response = await RecognizeFaceBiometricAPI(data);
+      const response = await RecognizeFaceBiometricAPI(data) as { data: any };
       const resData = response.data;
 
       if (resData.code === "0000") {

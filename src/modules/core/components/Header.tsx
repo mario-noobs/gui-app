@@ -179,7 +179,7 @@ export const Header: React.FC = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-20 blur transition-all duration-300"></div>
               </div>
               <div className="hidden lg:block text-left">
-                <p className="text-white text-sm font-medium">{profile?.name || "User"}</p>
+                <p className="text-white text-sm font-medium">{(profile?.first_name || "") + (profile?.last_name ? " " + profile.last_name : "") || "User"}</p>
                 <p className="text-purple-300 text-xs">{profile?.email}</p>
               </div>
               <ChevronDownIcon className="h-4 w-4 text-purple-300 group-hover:text-white group-hover:rotate-180 transition-all duration-300" />
@@ -188,7 +188,7 @@ export const Header: React.FC = () => {
             <MenuItems className="absolute right-0 mt-3 w-64 origin-top-right rounded-xl bg-slate-800/95 backdrop-blur-xl border border-purple-500/20 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden">
               <div className="p-2">
                 <div className="px-4 py-3 border-b border-purple-500/20">
-                  <p className="text-white font-medium text-sm">{profile?.name || "Welcome"}</p>
+                  <p className="text-white font-medium text-sm">{(profile?.first_name || "") + (profile?.last_name ? " " + profile.last_name : "") || "Welcome"}</p>
                   <p className="text-purple-300 text-xs">{profile?.email}</p>
                 </div>
 

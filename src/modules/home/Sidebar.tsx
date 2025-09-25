@@ -10,7 +10,6 @@ import {
   PresentationChartBarIcon,
   UserCircleIcon,
   DocumentTextIcon,
-  PowerIcon,
   FaceSmileIcon,
 } from "@heroicons/react/24/solid";
 import { motion } from "framer-motion";

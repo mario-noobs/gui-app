@@ -6,7 +6,7 @@ import { Typography, Button, Alert } from "@material-tailwind/react";
 import { motion } from "framer-motion";
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../context/FaceNotificationContextType';
-import axios from '../services/axios';
+import apiClient from '../services/axios';
 
 const FaceControlPage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -21,7 +21,7 @@ const FaceControlPage = () => {
       if (profile?.last_name) {
         setIsLoading(true);
         try {
-          const response = await axios.get(`/api/v1/face/identity/${profile.last_name}`);
+          const response = await apiClient.get(`/api/v1/face/identity/${profile.last_name}`);
           const resData = response.data;
 
           if (resData.code === "0000" && resData.data) {
@@ -57,26 +57,26 @@ const FaceControlPage = () => {
   const handleRemoveClick = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.delete(`/api/v1/face/identity/${profile?.last_name}`);
-      const resData = response.data;
-
+      const response = await apiClient.post('/api/v1/face/delete-identity', {});
+      const resData = response.data.data;
+      console.log(resData);
       if (resData.code === "0000") {
         showNotification({
-          path: '/api/v1/face/identity',
+          path: '/api/v1/face/delete-identity',
           code: resData.code,
           message: resData.message || 'Identity removed successfully!',
         });
         setIsRegistered(false);
       } else {
         showNotification({
-          path: '/api/v1/face/identity',
+          path: '/api/v1/face/delete-identity',
           code: resData.code,
           message: resData.message || 'Failed to remove identity.',
         });
       }
     } catch (error: unknown) {
       showNotification({
-        path: '/api/v1/face/identity',
+        path: '/api/v1/face/delete-identity',
         code: 'SERVER_ERROR',
         message: error instanceof Error ? error.message : 'An error occurred while removing identity.',
       });
@@ -216,3 +216,4 @@ const FaceControlPage = () => {
 };
 
 export default FaceControlPage;
+

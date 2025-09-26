@@ -9,6 +9,7 @@ import {
 import { ErrorResponse, useNavigate } from "react-router-dom";
 import {
   LoginAPI,
+  LogoutAPI,
   RegisterAPI,
   UpdateProfileAPI,
 } from "../services/api";
@@ -26,7 +27,7 @@ type AuthContextType = {
   handleLogin: (data: ILoginForm) => Promise<void>;
   handleRegister: (data: IRegisterForm) => void;
   handleUpdateProfile: (data: IUpdateProfile) => Promise<void>;
-  handleLogout: () => void;
+  handleLogout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -35,7 +36,7 @@ export const AuthContext = createContext<AuthContextType>({
   handleLogin: async () => {},
   handleRegister: () => {},
   handleUpdateProfile: async () => {},
-  handleLogout: () => {},
+  handleLogout: async () => {},
 });
 
 interface AuthProviderProps {
@@ -79,10 +80,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    setProfile(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      // Call logout API to blacklist the token on the server
+      await LogoutAPI<IResponse<boolean>>();
+    } catch (error) {
+      // Even if logout API fails, we still want to clear local storage
+      console.warn("Logout API failed:", error);
+    } finally {
+      // Always clear tokens and redirect
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      setProfile(null);
+      navigate("/login");
+    }
   };
 
   useEffect(() => {
@@ -98,11 +109,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const handleLogin = async (data: ILoginForm) => {
     LoginAPI<IResponse<ILoginResponse>>(data)
       .then((res) => {
-        const token = res.data.access_token.token;
-        localStorage.setItem("access_token", token);
+        const accessToken = res.data.access_token.token;
+        const refreshToken = res.data.refresh_token?.token;
+        
+        localStorage.setItem("access_token", accessToken);
+        if (refreshToken) {
+          localStorage.setItem("refresh_token", refreshToken);
+        }
 
         // Save the JWT subject (user ID) to localStorage for easy access
-        saveJwtSubToLocalStorage(token);
+        saveJwtSubToLocalStorage(accessToken);
       })
       .then(async () => {
         await handleGetProfile();

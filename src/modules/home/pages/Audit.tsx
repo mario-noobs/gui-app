@@ -1,137 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Typography,
   Card,
   CardBody,
   CardHeader,
   Chip,
-  Input,
-  Select,
-  Option,
+  Button,
+  Spinner,
 } from "@material-tailwind/react";
 import {
-  MagnifyingGlassIcon,
   CalendarDaysIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
   EyeIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
+import { GetAuditLogsAPI, AuditLog, AuditLogResponse } from "../services/auditApi";
 
-interface AuditLog {
-  id: string;
-  timestamp: string;
-  ip: string;
-  apiCall: string;
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-  status: "success" | "warning" | "error" | "info";
-  statusCode: number;
-  userAgent: string;
-  response_time: string;
-}
 
-const dummyAuditLogs: AuditLog[] = [
-  {
-    id: "1",
-    timestamp: "2024-09-24T10:30:15Z",
-    ip: "192.168.1.100",
-    apiCall: "/api/auth/face-login",
-    method: "POST",
-    status: "success",
-    statusCode: 200,
-    userAgent: "Chrome 120.0.0.0",
-    response_time: "245ms",
-  },
-  {
-    id: "2",
-    timestamp: "2024-09-24T10:25:42Z",
-    ip: "10.0.0.45",
-    apiCall: "/api/auth/login",
-    method: "POST",
-    status: "warning",
-    statusCode: 429,
-    userAgent: "Firefox 118.0",
-    response_time: "1.2s",
-  },
-  {
-    id: "3",
-    timestamp: "2024-09-24T10:20:33Z",
-    ip: "172.16.0.25",
-    apiCall: "/api/users/register",
-    method: "POST",
-    status: "success",
-    statusCode: 201,
-    userAgent: "Safari 17.0",
-    response_time: "389ms",
-  },
-  {
-    id: "4",
-    timestamp: "2024-09-24T10:15:11Z",
-    ip: "203.0.113.42",
-    apiCall: "/api/admin/users",
-    method: "GET",
-    status: "error",
-    statusCode: 403,
-    userAgent: "Unknown Bot",
-    response_time: "50ms",
-  },
-  {
-    id: "5",
-    timestamp: "2024-09-24T10:10:28Z",
-    ip: "192.168.1.200",
-    apiCall: "/api/users/profile",
-    method: "PUT",
-    status: "success",
-    statusCode: 200,
-    userAgent: "Edge 120.0.0.0",
-    response_time: "156ms",
-  },
-  {
-    id: "6",
-    timestamp: "2024-09-24T10:05:17Z",
-    ip: "10.0.0.100",
-    apiCall: "/api/data/export",
-    method: "GET",
-    status: "info",
-    statusCode: 200,
-    userAgent: "Chrome 120.0.0.0",
-    response_time: "2.1s",
-  },
-  {
-    id: "7",
-    timestamp: "2024-09-24T10:02:05Z",
-    ip: "185.220.101.32",
-    apiCall: "/api/auth/login",
-    method: "POST",
-    status: "error",
-    statusCode: 401,
-    userAgent: "curl/7.68.0",
-    response_time: "89ms",
-  },
-  {
-    id: "8",
-    timestamp: "2024-09-24T09:58:44Z",
-    ip: "192.168.1.150",
-    apiCall: "/api/face/register",
-    method: "POST",
-    status: "success",
-    statusCode: 201,
-    userAgent: "Chrome 120.0.0.0",
-    response_time: "567ms",
-  },
-];
 
 export function Audit() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    limit: 20,
+    offset: 0,
+    total: 0,
+  });
+  const [, setCurrentUserId] = useState<string>("");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  // Map status code to status type for UI
+  const getStatusType = (statusCode: number): string => {
+    if (statusCode >= 200 && statusCode < 300) return "success";
+    if (statusCode >= 400 && statusCode < 500) return "error";
+    if (statusCode >= 500) return "error";
+    return "info";
+  };
+
+  const getStatusColor = (statusCode: number) => {
+    const statusType = getStatusType(statusCode);
+    switch (statusType) {
       case "success":
         return "green";
-      case "warning":
-        return "amber";
       case "error":
         return "red";
       case "info":
@@ -139,6 +53,51 @@ export function Audit() {
       default:
         return "gray";
     }
+  };
+
+  // Fetch audit logs from API
+  const fetchAuditLogs = async (params = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response: AuditLogResponse = await GetAuditLogsAPI({
+        limit: pagination.limit,
+        offset: pagination.offset,
+        ...params,
+      });
+      
+      setAuditLogs(response.data.audit_logs);
+      setCurrentUserId(response.data.user_id);
+      
+      // Update pagination info if available
+      setPagination(prev => ({
+        ...prev,
+        total: response.data.audit_logs.length
+      }));
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch audit logs");
+      console.error("Error fetching audit logs:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data on component mount and when filters change
+  useEffect(() => {
+    fetchAuditLogs();
+  }, []);
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    const newOffset = pagination.offset + pagination.limit;
+    setPagination(prev => ({ ...prev, offset: newOffset }));
+    fetchAuditLogs({ offset: newOffset });
+  };
+
+  const handlePrevPage = () => {
+    const newOffset = Math.max(0, pagination.offset - pagination.limit);
+    setPagination(prev => ({ ...prev, offset: newOffset }));
+    fetchAuditLogs({ offset: newOffset });
   };
 
   const getMethodColor = (method: string) => {
@@ -158,23 +117,15 @@ export function Audit() {
     }
   };
 
-  const filteredLogs = dummyAuditLogs.filter((log) => {
-    const matchesSearch =
-      log.ip.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.apiCall.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.method.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === "all" || log.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
+  // Calculate stats from current audit logs
   const stats = {
-    total: dummyAuditLogs.length,
-    success: dummyAuditLogs.filter((log) => log.status === "success").length,
-    warnings: dummyAuditLogs.filter((log) => log.status === "warning").length,
-    errors: dummyAuditLogs.filter((log) => log.status === "error").length,
+    total: auditLogs.length,
+    success: auditLogs.filter((log) => getStatusType(log.status) === "success").length,
+    errors: auditLogs.filter((log) => getStatusType(log.status) === "error").length,
+    info: auditLogs.filter((log) => getStatusType(log.status) === "info").length,
   };
+
+  const displayLogs = auditLogs;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -244,18 +195,18 @@ export function Audit() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardBody className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography className="text-amber-100 text-sm">
-                      Warnings
+                    <Typography className="text-blue-100 text-sm">
+                      Info
                     </Typography>
                     <Typography variant="h4" className="font-bold">
-                      {stats.warnings}
+                      {stats.info}
                     </Typography>
                   </div>
-                  <ExclamationTriangleIcon className="h-8 w-8 text-amber-200" />
+                  <ExclamationTriangleIcon className="h-8 w-8 text-blue-200" />
                 </div>
               </CardBody>
             </Card>
@@ -282,135 +233,6 @@ export function Audit() {
           </motion.div>
         </div>
 
-        {/* Enhanced Search and Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="mb-6 shadow-lg border-0">
-            <CardBody className="p-8">
-              <div className="mb-4">
-                <Typography variant="h6" className="text-gray-800 font-semibold mb-2">
-                  🔍 Search & Filter Logs
-                </Typography>
-                <Typography className="text-gray-500 text-sm">
-                  Find specific API calls, IP addresses, or filter by status
-                </Typography>
-              </div>
-
-              <div className="flex flex-col lg:flex-row gap-6 items-end">
-                <div className="flex-1 space-y-2">
-                  <Typography className="text-sm font-medium text-gray-700">
-                    Search Query
-                  </Typography>
-                  <div className="relative">
-                    <Input
-                      size="lg"
-                      label="Search by IP address, API endpoint, or HTTP method..."
-                      icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full !border-gray-300 focus:!border-blue-500"
-                      containerProps={{
-                        className: "min-w-0"
-                      }}
-                    />
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm("")}
-                        className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        title="Clear search"
-                      >
-                        <XCircleIcon className="h-5 w-5" />
-                      </button>
-                    )}
-                  </div>
-                  {searchTerm && (
-                    <Typography className="text-xs text-blue-600 flex items-center gap-1">
-                      <span>🔍</span>
-                      Showing results for: <span className="font-semibold">"{searchTerm}"</span>
-                    </Typography>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 lg:min-w-[300px]">
-                  <div className="space-y-2">
-                    <Typography className="text-sm font-medium text-gray-700">
-                      Filter by Status
-                    </Typography>
-                    <Select
-                      size="lg"
-                      label="Status Filter"
-                      value={statusFilter}
-                      onChange={(value) => setStatusFilter(value || "all")}
-                      className="!border-gray-300 focus:!border-blue-500"
-                    >
-                      <Option value="all">🌐 All Status</Option>
-                      <Option value="success">✅ Success</Option>
-                      <Option value="warning">⚠️ Warning</Option>
-                      <Option value="error">❌ Error</Option>
-                      <Option value="info">ℹ️ Info</Option>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col justify-end">
-                    <button
-                      onClick={() => {
-                        setSearchTerm("");
-                        setStatusFilter("all");
-                      }}
-                      className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
-                      title="Clear all filters"
-                    >
-                      <XCircleIcon className="h-4 w-4" />
-                      Clear
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Search Results Summary */}
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-4">
-                    <Typography className="text-sm text-gray-600">
-                      <span className="font-semibold text-blue-600">{filteredLogs.length}</span> of <span className="font-semibold">{dummyAuditLogs.length}</span> entries
-                    </Typography>
-                    {(searchTerm || statusFilter !== "all") && (
-                      <div className="flex items-center gap-2">
-                        {searchTerm && (
-                          <Chip
-                            value={`Search: ${searchTerm}`}
-                            onClose={() => setSearchTerm("")}
-                            className="bg-blue-100 text-blue-800 text-xs"
-                            size="sm"
-                          />
-                        )}
-                        {statusFilter !== "all" && (
-                          <Chip
-                            value={`Status: ${statusFilter}`}
-                            onClose={() => setStatusFilter("all")}
-                            className="bg-green-100 text-green-800 text-xs"
-                            size="sm"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {filteredLogs.length === 0 && (searchTerm || statusFilter !== "all") && (
-                    <Typography className="text-sm text-amber-600 flex items-center gap-1">
-                      <ExclamationTriangleIcon className="h-4 w-4" />
-                      No results found
-                    </Typography>
-                  )}
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </motion.div>
-
         {/* Audit Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -419,10 +241,18 @@ export function Audit() {
         >
           <Card>
             <CardHeader className="bg-gray-50 p-6">
-              <Typography variant="h6" className="flex items-center gap-2">
-                <CalendarDaysIcon className="h-5 w-5" />
-                API Logs ({filteredLogs.length} entries)
-              </Typography>
+              <div className="flex items-center justify-between">
+                <Typography variant="h6" className="flex items-center gap-2">
+                  <CalendarDaysIcon className="h-5 w-5" />
+                  API Logs ({displayLogs.length} entries)
+                </Typography>
+                {loading && (
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Spinner className="h-4 w-4" />
+                    <Typography className="text-sm">Loading...</Typography>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardBody className="p-0">
               <div className="overflow-x-auto">
@@ -450,69 +280,125 @@ export function Audit() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredLogs.map((log, index) => (
-                      <motion.tr
-                        key={log.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.05 * index }}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <td className="p-4">
-                          <div>
-                            <Typography className="text-sm font-medium text-gray-800">
-                              {new Date(log.timestamp).toLocaleDateString()}
-                            </Typography>
-                            <Typography className="text-xs text-gray-500">
-                              {new Date(log.timestamp).toLocaleTimeString()}
-                            </Typography>
+                    {displayLogs.length === 0 && !loading ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center">
+                          <div className="text-gray-500">
+                            {error ? (
+                              <div className="flex items-center justify-center gap-2 text-red-600">
+                                <ExclamationTriangleIcon className="h-5 w-5" />
+                                <span>Error loading audit logs: {error}</span>
+                                <Button
+                                  size="sm"
+                                  color="blue"
+                                  onClick={() => fetchAuditLogs()}
+                                  className="ml-2"
+                                >
+                                  Retry
+                                </Button>
+                              </div>
+                            ) : (
+                              "No audit logs found"
+                            )}
                           </div>
                         </td>
-                        <td className="p-4">
-                          <Typography className="text-sm font-mono text-gray-800">
-                            {log.ip}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Typography className="text-sm font-mono text-blue-600">
-                            {log.apiCall}
-                          </Typography>
-                        </td>
-                        <td className="p-4">
-                          <Chip
-                            value={log.method}
-                            className={`bg-${getMethodColor(
-                              log.method
-                            )}-100 text-${getMethodColor(log.method)}-800 text-xs font-mono`}
-                            size="sm"
-                          />
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
+                      </tr>
+                    ) : (
+                      displayLogs.map((log: AuditLog, index: number) => (
+                        <motion.tr
+                          key={log.id || `${log.time}-${index}`}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.05 * index }}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <td className="p-4">
+                            <div>
+                              <Typography className="text-sm font-medium text-gray-800">
+                                {new Date(log.time).toLocaleDateString()}
+                              </Typography>
+                              <Typography className="text-xs text-gray-500">
+                                {new Date(log.time).toLocaleTimeString()}
+                              </Typography>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <Typography className="text-sm font-mono text-gray-800">
+                              {log.ip_address}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
+                            <Typography className="text-sm font-mono text-blue-600">
+                              {log.api_call}
+                            </Typography>
+                          </td>
+                          <td className="p-4">
                             <Chip
-                              value={log.statusCode.toString()}
-                              className={`bg-${getStatusColor(
-                                log.status
-                              )}-100 text-${getStatusColor(log.status)}-800 text-xs`}
+                              value={log.method}
+                              className={`bg-${getMethodColor(
+                                log.method
+                              )}-100 text-${getMethodColor(log.method)}-800 text-xs font-mono`}
                               size="sm"
                             />
-                            <Typography className="text-xs text-gray-500">
-                              {log.status}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <Chip
+                                value={log.status.toString()}
+                                className={`bg-${getStatusColor(
+                                  log.status
+                                )}-100 text-${getStatusColor(log.status)}-800 text-xs`}
+                                size="sm"
+                              />
+                              <Typography className="text-xs text-gray-500">
+                                {getStatusType(log.status)}
+                              </Typography>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <Typography className="text-sm text-gray-600">
+                              {log.response_time}ms
                             </Typography>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <Typography className="text-sm text-gray-600">
-                            {log.response_time}
-                          </Typography>
-                        </td>
-                      </motion.tr>
-                    ))}
+                          </td>
+                        </motion.tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </CardBody>
           </Card>
+          
+          {/* Pagination Controls */}
+          {displayLogs.length > 0 && (
+            <div className="mt-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {pagination.offset + 1} to {Math.min(pagination.offset + pagination.limit, pagination.offset + displayLogs.length)} entries
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  onClick={handlePrevPage}
+                  disabled={pagination.offset === 0 || loading}
+                  className="flex items-center gap-1"
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={displayLogs.length < pagination.limit || loading}
+                  className="flex items-center gap-1"
+                >
+                  Next
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </div>

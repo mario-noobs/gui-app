@@ -56,3 +56,34 @@ export const UpdateProfileAPI = <T>(data: IUpdateProfile): Promise<T> => {
       });
   });
 };
+
+export const LogoutAPI = <T>(): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const token = localStorage.getItem("access_token");
+    interceptor
+      .post("/api/v1/user/logout", {
+        Authorization: token,
+      })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const RefreshTokenAPI = <T>(refreshToken: string): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    interceptor
+      .post("/api/v1/user/refresh", { 
+        refresh_token: refreshToken 
+      })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};

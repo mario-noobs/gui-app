@@ -25,7 +25,7 @@ export function HandleError(
 }
 
 const interceptor = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL || "/api",
+  baseURL: import.meta.env.VITE_APP_API_URL || "/gateway",
   headers: {
     "Content-Type": "application/json",
   },
@@ -92,7 +92,7 @@ interceptor.interceptors.response.use(
       if (refreshToken) {
         try {
           // Use the same baseURL as the axios instance
-          const refreshUrl = `${import.meta.env.VITE_APP_API_URL || "/api"}/api/v1/user/refresh`;
+          const refreshUrl = `${import.meta.env.VITE_APP_API_URL || "/gateway"}/api/v1/user/refresh`;
           console.log("[Axios Interceptor] Calling refresh endpoint:", refreshUrl);
           const response = await axios.post(refreshUrl, {
             refresh_token: refreshToken

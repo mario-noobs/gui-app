@@ -3,6 +3,7 @@ import { AuthLayout } from "../../auth/components/AuthLayout";
 import LoginForm from "../../auth/components/LoginUI";
 import { RegisterUI } from "../../auth/components/RegisterUI";
 import { PrivateComponent } from "../../auth/components/PrivateComponent";
+import { AdminRoute } from "../../auth/components/AdminRoute";
 
 import PageNotFound from "./PageNotFound";
 import { MainLayout } from "./MainLayout";
@@ -15,6 +16,9 @@ import FaceControlPage from "../../face-reg/components/FaceHome";
 import Register from "../../face-reg/register/component/Register";
 import Recognize from "../../face-reg/recognize/component/Recognize";
 import FaceRegRouteGuard from '../../face-reg/components/FaceRegRouteGuard';
+import AdminDashboard from "../../admin/pages/AdminDashboard";
+import UserManagement from "../../admin/pages/UserManagement";
+import RoleManagement from "../../admin/pages/RoleManagement";
 
 export const MainRouter = () => {
   return (
@@ -43,7 +47,7 @@ export const MainRouter = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/audit" element={<Audit />} />
+        <Route path="/audit" element={<AdminRoute><Audit /></AdminRoute>} />
         <Route path="/face-regconize" element={<FaceControlPage />}>
           <Route element={<FaceRegRouteGuard type="register" />}>
             <Route path="register" element={<Register />} />
@@ -51,6 +55,11 @@ export const MainRouter = () => {
           <Route element={<FaceRegRouteGuard type="recognize" />}>
             <Route path="recognize" element={<Recognize />} />
           </Route>
+        </Route>
+        <Route path="/admin" element={<AdminRoute><Outlet /></AdminRoute>}>
+          <Route path="" element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="roles" element={<RoleManagement />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

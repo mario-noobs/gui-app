@@ -17,11 +17,7 @@ export const LoginAPI = <T>(data: ILoginForm): Promise<T> => {
 export const GetProfileAPI = <T>(): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .post("/profile", {
-        headers: {
-          Authorization: `${localStorage.getItem("access_token")}`,
-        },
-      })
+      .post("/api/v1/profile")
       .then((response) => {
         resolve(response.data);
       })
@@ -62,7 +58,7 @@ export const LogoutAPI = <T>(): Promise<T> => {
     const token = localStorage.getItem("access_token");
     interceptor
       .post("/api/v1/user/logout", {
-        Authorization: token,
+        access_token: token,
       })
       .then((response) => {
         resolve(response.data);

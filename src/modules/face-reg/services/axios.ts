@@ -12,8 +12,8 @@ export type ErrorResponse = {
 export function handleError(err: Error | AxiosError<ErrorResponse>): ErrorResponse {
   if (axios.isAxiosError(err)) {
     return {
-      message: err.response?.data.message || "Request failed",
-      code: err.response?.status || 500,
+      message: err.response?.data?.error?.message || err.response?.data?.message || "Request failed",
+      code: err.response?.data?.error?.code || err.response?.status || 500,
       debug: err.message,
       status: "error",
     };
@@ -29,7 +29,7 @@ export function handleError(err: Error | AxiosError<ErrorResponse>): ErrorRespon
 
 // Create an Axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL || "/gateway",
+  baseURL: "",
   headers: {
     "Content-Type": "application/json",
   },

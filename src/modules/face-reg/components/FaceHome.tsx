@@ -6,7 +6,6 @@ import { Typography, Button, Alert } from "@material-tailwind/react";
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../context/FaceNotificationContextType';
 import apiClient from '../services/axios';
-import { getJwtUserId } from '../../auth/utils/jwtUtils';
 import { FaceRegContext } from './ProtectedRoute';
 
 const FaceControlPage = () => {
@@ -18,19 +17,16 @@ const FaceControlPage = () => {
 
   useEffect(() => {
     const checkRegistrationStatus = async () => {
-      const jwtUserId = getJwtUserId();
-      if (jwtUserId) {
-        setIsLoading(true);
-        try {
-          const response = await apiClient.get(`/api/v1/face/is-registered?userId=${jwtUserId}`);
-          const resData = response.data;
-          setIsRegistered(resData.registered === true);
-        } catch (error) {
-          setIsRegistered(false);
-          console.error('Error checking registration status:', error);
-        } finally {
-          setIsLoading(false);
-        }
+      setIsLoading(true);
+      try {
+        const response = await apiClient.get(`/api/v1/face/is-registered`);
+        const resData = response.data;
+        setIsRegistered(resData.data?.is_registered === true);
+      } catch (error) {
+        setIsRegistered(false);
+        console.error('Error checking registration status:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 

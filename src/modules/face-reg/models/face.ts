@@ -2,8 +2,7 @@ import { AxiosResponse, AxiosError } from 'axios';
 import { FaceNotificationData, ApiResponseWrapper } from '../utils/notificationHandler';
 
 export type IFace = {
-    userId: string;
-    imageBase64: string;
+    image_data: string;
 };
 
 export const handleApiCall = async <T>(

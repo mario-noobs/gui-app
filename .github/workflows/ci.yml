@@ -20,7 +20,8 @@ jobs:
       package_manager: pnpm
       node_version: "20"
       test_enabled: false
-      sonar_project_key: mario-noobs_gui-app
+      sonar_project_key: mario-noobs_backend-service
+      sonar_organization: mario-noobs
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

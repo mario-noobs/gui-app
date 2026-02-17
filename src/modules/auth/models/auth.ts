@@ -23,11 +23,18 @@ export type ILoginResponse = {
   };
 };
 
+export type IRole = {
+  name: string;
+  permissions: string[];
+};
+
 export type IProfile = {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
+  role: IRole;
+  status: string;
   created_at: string;
   updated_at: string;
   avatar: string;

@@ -28,6 +28,9 @@ type AuthContextType = {
   handleRegister: (data: IRegisterForm) => void;
   handleUpdateProfile: (data: IUpdateProfile) => Promise<void>;
   handleLogout: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (roleName: string) => boolean;
+  isSuperAdmin: () => boolean;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -37,6 +40,9 @@ export const AuthContext = createContext<AuthContextType>({
   handleRegister: () => {},
   handleUpdateProfile: async () => {},
   handleLogout: async () => {},
+  hasPermission: () => false,
+  hasRole: () => false,
+  isSuperAdmin: () => false,
 });
 
 interface AuthProviderProps {
@@ -49,6 +55,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<IProfile | null>(null);
+
+  const hasPermission = useCallback(
+    (permission: string): boolean => {
+      if (!profile?.role) return false;
+      if (profile.role.name === "SUPERADMIN") return true;
+      return profile.role.permissions?.includes(permission) ?? false;
+    },
+    [profile]
+  );
+
+  const hasRole = useCallback(
+    (roleName: string): boolean => {
+      return profile?.role?.name === roleName;
+    },
+    [profile]
+  );
+
+  const isSuperAdmin = useCallback((): boolean => {
+    return profile?.role?.name === "SUPERADMIN";
+  }, [profile]);
 
   const handleGetProfile = useCallback(async () => {
     try {
@@ -111,7 +137,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .then((res) => {
         const accessToken = res.data.access_token.token;
         const refreshToken = res.data.refresh_token?.token;
-        
+
         localStorage.setItem("access_token", accessToken);
         if (refreshToken) {
           localStorage.setItem("refresh_token", refreshToken);
@@ -150,6 +176,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         handleRegister,
         handleUpdateProfile,
         handleLogout,
+        hasPermission,
+        hasRole,
+        isSuperAdmin,
       }}
     >
       {loading ? <LoadingPage /> : children}

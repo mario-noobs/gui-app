@@ -8,7 +8,7 @@ interface IMainLayoutProps {
 export const MainLayout = ({ children }: IMainLayoutProps) => {
   return (
     <FaceNotificationProvider>
-      <div className="min-h-screen bg-gray-200 flex flex-col">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Header />
         <main className="flex-grow flex">
           {children}

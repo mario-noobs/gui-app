@@ -17,10 +17,10 @@ export const RHFInput: React.FC<
       control={control}
       render={({ field, fieldState: { error } }) => (
         <div className="text-left">
-          <div className="mb-4">
+          <div className="mb-3">
             {label && (
               <label
-                className="block text-gray-300 text-sm font-bold mb-2"
+                className="block text-gray-700 text-sm font-medium mb-1"
                 htmlFor={name}
               >
                 {label}
@@ -29,14 +29,14 @@ export const RHFInput: React.FC<
             <input
               {...field}
               className={twMerge(
-                `shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  error ? "border-red-500" : ""
+                `border rounded w-full py-2 px-3 text-sm text-gray-900 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                  error ? "border-red-400" : "border-gray-200"
                 }`,
               )}
               {...props}
             />
             {error && (
-              <p className="text-red-500 text-xs italic mt-1">
+              <p className="text-red-500 text-xs mt-1">
                 {error.message}
               </p>
             )}

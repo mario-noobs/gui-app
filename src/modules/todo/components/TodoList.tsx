@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ITodoItem } from "../models/todo";
 import TodoItem from "./TodoItem";
-import Logo from "../../../assets/logo.svg";
 import {
   CreateTodoAPI,
   DeleteTodoAPI,
@@ -140,6 +139,8 @@ const TodoList = () => {
           first_name: profile?.first_name || "",
           last_name: profile?.last_name || "",
           email: profile?.email || "",
+          role: profile?.role || { name: "", permissions: [] },
+          status: profile?.status || "",
           avatar: "",
           created_at: profile?.created_at || "",
           updated_at: profile?.updated_at || "",
@@ -160,11 +161,9 @@ const TodoList = () => {
   console.log("render");
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-300 py-8">
+    <div className="min-h-screen bg-gray-50 text-gray-700 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="flex justify-center mb-8 w-full">
-          <img src={Logo} alt="logo" />
-        </div>
+        <h1 className="text-lg font-semibold text-gray-900 mb-6">Tasks</h1>
 
         <div className="flex mb-6">
           <input
@@ -173,26 +172,26 @@ const TodoList = () => {
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
             placeholder="Enter a new task..."
-            className="flex-grow bg-gray-800 text-white rounded-l px-4 py-2 focus:outline-none"
+            className="flex-grow border border-gray-200 rounded-l px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
           <button
             onClick={handleAddTask}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r transition duration-200"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-r transition-colors"
           >
             Add
           </button>
         </div>
 
         <div className="flex justify-between text-sm mb-4">
-          <span>
-            Total task{" "}
-            <span className="bg-gray-800 px-2 py-1 rounded-full ml-1">
+          <span className="text-gray-500">
+            Total{" "}
+            <span className="text-gray-900 font-medium ml-1">
               {todos.length}
             </span>
           </span>
-          <span className="text-purple-400">
+          <span className="text-gray-500">
             Completed{" "}
-            <span className="bg-gray-800 px-2 py-1 rounded-full ml-1">
+            <span className="text-gray-900 font-medium ml-1">
               {completedCount} of {todos.length}
             </span>
           </span>

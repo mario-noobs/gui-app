@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../style/UploadStyles.css';
 import { RecognizeFaceBiometricAPI } from '../services/apis';
 import { IFace } from '../../models/face';
@@ -6,7 +6,6 @@ import LoadingPage from '../../../core/components/Loading';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
 import MatchIndicator from './MatchIndicator';
-import { getJwtUserId } from '../../../auth/utils/jwtUtils';
 import UploadForm from '../../components/UploadForm';
 
 const Recognize = () => {
@@ -22,16 +21,6 @@ const Recognize = () => {
     isMatch: boolean;
   } | null>(null);
 
-  // Get JWT subject (user ID) once on component mount
-  const jwtUserId = React.useMemo(() => {
-    // First try to get from localStorage
-    const storedUserId = localStorage.getItem('jwt_user_id');
-    if (storedUserId) return storedUserId;
-
-    // If not in localStorage, try to extract from token
-    return getJwtUserId() || `user-${profile?.id || 'unknown'}`;
-  }, [profile]);
-
   const handleImageChange = (img: string | null, b64: string | null) => {
     setImage(img);
     setBase64(b64);
@@ -42,8 +31,7 @@ const Recognize = () => {
     if (base64) {
       setLoading(true);
       await handleRecognizeBiometric({
-        userId: jwtUserId, // Using JWT user ID instead of profile.id
-        imageBase64: base64
+        image_data: base64
       });
     } else {
       showNotification({
@@ -62,13 +50,18 @@ const Recognize = () => {
       console.log("RecognizeFaceBiometricAPI", resData);
       if (resData.code === "0000") {
         const recognitionDetails = resData.data;
-        const isUserMatch = recognitionDetails?.name === jwtUserId;
+        // searh_result is a map of userId -> probability, e.g. { "2": "0.9998" }
+        const searchResult = recognitionDetails?.searh_result || {};
+        const userIdStr = String(profile?.id);
+        const probability = searchResult[userIdStr]
+          ? parseFloat(searchResult[userIdStr])
+          : 0;
+        const isUserMatch = probability > 0;
 
         setRecognitionResult({
-          // Display user's full name only if there's a match, otherwise display 'Unknown'
           name: isUserMatch ? (profile?.first_name + " " + profile?.last_name) || 'Unknown' : 'Unknown',
-          probability: recognitionDetails?.probability || 0,
-          timestamp: recognitionDetails?.created_at ? new Date(recognitionDetails.created_at).toLocaleString() : 'N/A',
+          probability,
+          timestamp: new Date().toLocaleString(),
           isMatch: isUserMatch
         });
 
@@ -83,7 +76,6 @@ const Recognize = () => {
           code: resData.code,
           message: resData.message || 'Recognition failed.',
         });
-        // Clear any previous recognition result
         setRecognitionResult(null);
       }
     } catch (error: any) {
@@ -99,7 +91,7 @@ const Recognize = () => {
     }
   };
 
-  const handleClearImage = (event: React.MouseEvent) => {
+  const handleClearImage = (event: { stopPropagation: () => void }) => {
     event.stopPropagation();
     setImage(null);
     setBase64(null);

@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import '../style/UploadStyles.css';
 import { RegisterFaceBiometricAPI } from '../services/apis';
 import LoadingPage from '../../../core/components/Loading';
-import { useAuth } from '../../../auth/hooks/useAuth';
 import { useFaceNotificationContext } from '../../context/FaceNotificationContextType';
-import { getJwtUserId } from '../../../auth/utils/jwtUtils';
 import UploadForm from '../../components/UploadForm';
 
 interface RegisterContextType {
@@ -15,23 +13,10 @@ interface RegisterContextType {
 const Register = () => {
   const navigate = useNavigate();
   const { onRegistrationStatusChange } = useOutletContext<RegisterContextType>();
-  const { profile } = useAuth();
   const { showNotification } = useFaceNotificationContext();
   const [image, setImage] = useState<string | null>(null);
   const [base64, setBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Get JWT subject (user ID) once on component mount
-  const jwtUserId = React.useMemo(() => {
-    // First try to get from localStorage
-    const storedUserId = localStorage.getItem('jwt_user_id');
-    if (storedUserId) return storedUserId;
-
-    // If not in localStorage, try to extract from token
-    return getJwtUserId() || `user-${profile?.id || 'unknown'}`;
-  }, [profile]);
-
-  console.log("Register", profile);
 
   const handleImageChange = (img: string | null, b64: string | null) => {
     setImage(img);
@@ -56,8 +41,7 @@ const Register = () => {
     setLoading(true);
     try {
       const response = await RegisterFaceBiometricAPI({
-        userId: jwtUserId, // Using JWT user ID instead of profile.id
-        imageBase64: base64
+        image_data: base64
       }) as { data: any };
       const resData = response.data;
       if (resData.code === '0000') {

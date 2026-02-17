@@ -1,11 +1,10 @@
 export const LoadingPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="mb-8">
-        <div className="w-16 h-16 border-t-4 border-b-4 border-white rounded-full animate-spin"></div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-500">
+      <div className="mb-4">
+        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
       </div>
-      <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-      <p className="text-sm">Please wait while we prepare your content</p>
+      <p className="text-sm">Loading...</p>
     </div>
   );
 };

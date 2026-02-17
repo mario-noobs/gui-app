@@ -23,11 +23,11 @@ const LoginForm = () => {
   const { handleSubmit } = methods;
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div className="w-full max-w-sm">
+      <div className="bg-white border border-gray-200 rounded-lg px-6 py-6">
         <FormProvider methods={methods} onSubmit={handleSubmit(handleLogin)}>
-          <h2 className="text-2xl font-bold mb-6 text-white text-center">
-            Login
+          <h2 className="text-lg font-semibold mb-5 text-gray-900 text-center">
+            Sign in
           </h2>
           <div className="mb-4">
             <RHFInput
@@ -37,7 +37,7 @@ const LoginForm = () => {
               label="Email"
             />
           </div>
-          <div className="mb-6 relative">
+          <div className="mb-5">
             <RHFInput
               name="password"
               type="password"
@@ -46,20 +46,20 @@ const LoginForm = () => {
             />
           </div>
           <button
-            className="bg-blue-500 hover:bg-blue-700 w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-600 hover:bg-blue-700 w-full text-white text-sm font-medium py-2 px-4 rounded transition-colors"
             type="submit"
           >
-            Sign In
+            Sign in
           </button>
           <div className="text-center mt-4">
-            <p className="text-gray-300 text-sm">
+            <p className="text-gray-500 text-sm">
               Don't have an account?{" "}
               <a
                 href="#"
-                className="text-blue-500 hover:text-blue-800 font-bold"
+                className="text-blue-600 hover:text-blue-700 font-medium"
                 onClick={() => navigate("/register")}
               >
-                Register here
+                Register
               </a>
             </p>
           </div>

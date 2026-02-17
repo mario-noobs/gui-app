@@ -9,12 +9,10 @@ import { useAuth } from "../hooks/useAuth";
 export const RegisterUI = () => {
   const { handleRegister } = useAuth();
   const defaultValues: IRegisterForm = {
-    auth_email_password: {
-      password: "",
-      email: "",
-    },
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
   };
 
   const methods = useForm({
@@ -33,7 +31,7 @@ export const RegisterUI = () => {
           </h2>
           <div className="mb-4">
             <RHFInput
-              name="first_name"
+              name="firstName"
               type="text"
               placeholder="Enter your first name"
               label="First Name"
@@ -41,7 +39,7 @@ export const RegisterUI = () => {
           </div>
           <div className="mb-4">
             <RHFInput
-              name="last_name"
+              name="lastName"
               type="text"
               placeholder="Enter your last name"
               label="Last Name"
@@ -49,7 +47,7 @@ export const RegisterUI = () => {
           </div>
           <div className="mb-4">
             <RHFInput
-              name="auth_email_password.email"
+              name="email"
               type="text"
               placeholder="Enter your email"
               label="Email"
@@ -57,7 +55,7 @@ export const RegisterUI = () => {
           </div>
           <div className="mb-5">
             <RHFInput
-              name="auth_email_password.password"
+              name="password"
               type="password"
               placeholder="Enter your password"
               label="Password"

@@ -5,10 +5,13 @@ export type ErrorResponse = {
 };
 
 export function HandleError(
-  err: Error | AxiosError<ErrorResponse>
+  err: Error | AxiosError
 ): ErrorResponse {
   if (axios.isAxiosError(err)) {
-    return err.response?.data || { message: err.message };
+    const data = err.response?.data;
+    // Backend returns { error: { code, message }, traceId }
+    const message = data?.error?.message || data?.message || err.message;
+    return { message };
   } else {
     return { message: err.message || "Unknown Error" };
   }

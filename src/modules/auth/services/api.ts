@@ -89,8 +89,8 @@ export const LogoutAPI = <T>(): Promise<T> => {
 export const RefreshTokenAPI = <T>(refreshToken: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .post("/api/v1/user/refresh", { 
-        refresh_token: refreshToken 
+      .post("/api/v1/user/refresh", {
+        refresh_token: refreshToken
       })
       .then((response) => {
         resolve(response.data);
@@ -99,4 +99,16 @@ export const RefreshTokenAPI = <T>(refreshToken: string): Promise<T> => {
         reject(err);
       });
   });
+};
+
+export const ForgotPasswordAPI = (data: { email: string }) => {
+  return interceptor.post("/api/v1/user/forgot-password", data).then((res) => res.data);
+};
+
+export const ResetPasswordAPI = (data: { token: string; new_password: string; confirm_password: string }) => {
+  return interceptor.post("/api/v1/user/reset-password", data).then((res) => res.data);
+};
+
+export const AcceptInvitationAPI = (data: { token: string; password: string; confirm_password: string }) => {
+  return interceptor.post("/api/v1/user/accept-invitation", data).then((res) => res.data);
 };

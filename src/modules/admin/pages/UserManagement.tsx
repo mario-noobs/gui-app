@@ -3,12 +3,15 @@ import { Typography, Button } from "@material-tailwind/react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  PlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
   GetAllUsersAPI,
   GetAllRolesAPI,
   AssignRoleAPI,
   UpdateUserStatusAPI,
+  InviteUserAPI,
 } from "../services/adminApi";
 import { IRoleDetail, IUserAdmin } from "../models/admin";
 import { enqueueSnackbar } from "notistack";
@@ -20,6 +23,9 @@ const UserManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ first_name: "", last_name: "", email: "", role_name: "" });
+  const [inviteLoading, setInviteLoading] = useState(false);
   const size = 20;
 
   const fetchUsers = async (p: number) => {
@@ -69,11 +75,32 @@ const UserManagement = () => {
     }
   };
 
+  const handleInviteUser = async () => {
+    if (!inviteForm.first_name || !inviteForm.last_name || !inviteForm.email || !inviteForm.role_name) {
+      enqueueSnackbar("All fields are required", { variant: "error" });
+      return;
+    }
+    try {
+      setInviteLoading(true);
+      await InviteUserAPI(inviteForm);
+      enqueueSnackbar("Invitation sent", { variant: "success" });
+      setShowInviteModal(false);
+      setInviteForm({ first_name: "", last_name: "", email: "", role_name: "" });
+      fetchUsers(page);
+    } catch (error: any) {
+      const message = error?.response?.data?.error?.message || "Failed to invite user";
+      enqueueSnackbar(message, { variant: "error" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "activated": return "text-green-700 bg-green-50";
       case "deactivated": return "text-yellow-700 bg-yellow-50";
       case "banned": return "text-red-700 bg-red-50";
+      case "invited": return "text-blue-700 bg-blue-50";
       default: return "text-gray-700 bg-gray-50";
     }
   };
@@ -82,13 +109,25 @@ const UserManagement = () => {
     <div className="w-full h-full overflow-y-auto bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Page header */}
-        <div className="mb-6">
-          <Typography variant="h4" className="text-gray-900 font-semibold">
-            User Management
-          </Typography>
-          <Typography className="text-gray-500 text-sm mt-1">
-            {totalElements} total users
-          </Typography>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <Typography variant="h4" className="text-gray-900 font-semibold">
+              User Management
+            </Typography>
+            <Typography className="text-gray-500 text-sm mt-1">
+              {totalElements} total users
+            </Typography>
+          </div>
+          <Button
+            size="sm"
+            className="flex items-center gap-1.5 bg-blue-600"
+            onClick={() => {
+              setInviteForm({ first_name: "", last_name: "", email: "", role_name: roles[0]?.name || "" });
+              setShowInviteModal(true);
+            }}
+          >
+            <PlusIcon className="h-4 w-4" /> Invite User
+          </Button>
         </div>
 
         {/* Table */}
@@ -240,6 +279,73 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+        {/* Invite User Modal */}
+        {showInviteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900">Invite User</h3>
+                <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="px-5 py-4 space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First name</label>
+                  <input
+                    type="text"
+                    value={inviteForm.first_name}
+                    onChange={(e) => setInviteForm({ ...inviteForm, first_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last name</label>
+                  <input
+                    type="text"
+                    value={inviteForm.last_name}
+                    onChange={(e) => setInviteForm({ ...inviteForm, last_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={inviteForm.email}
+                    onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <select
+                    value={inviteForm.role_name}
+                    onChange={(e) => setInviteForm({ ...inviteForm, role_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.name}>{role.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200">
+                <Button size="sm" variant="outlined" onClick={() => setShowInviteModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-blue-600"
+                  disabled={inviteLoading}
+                  onClick={handleInviteUser}
+                >
+                  {inviteLoading ? "Sending..." : "Send Invitation"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

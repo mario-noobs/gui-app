@@ -12,6 +12,10 @@ export const UpdateUserStatusAPI = (userId: number, status: string): Promise<Api
   return interceptor.put(`/api/v1/admin/users/${userId}/status`, { status }).then((res) => res.data);
 };
 
+export const InviteUserAPI = (data: { first_name: string; last_name: string; email: string; role_name: string }): Promise<ApiResponse<IUserAdmin>> => {
+  return interceptor.post("/api/v1/admin/users/invite", data).then((res) => res.data);
+};
+
 // Role management
 export const AssignRoleAPI = (userId: number, roleName: string): Promise<ApiResponse<void>> => {
   return interceptor.put(`/api/v1/admin/rbac/users/${userId}/role`, { role_name: roleName }).then((res) => res.data);

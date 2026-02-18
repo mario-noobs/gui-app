@@ -2,6 +2,9 @@ import { Outlet, Route, Routes } from "react-router-dom";
 import { AuthLayout } from "../../auth/components/AuthLayout";
 import LoginForm from "../../auth/components/LoginUI";
 import { RegisterUI } from "../../auth/components/RegisterUI";
+import ForgotPasswordUI from "../../auth/components/ForgotPasswordUI";
+import ResetPasswordUI from "../../auth/components/ResetPasswordUI";
+import AcceptInvitationUI from "../../auth/components/AcceptInvitationUI";
 import { PrivateComponent } from "../../auth/components/PrivateComponent";
 import { AdminRoute } from "../../auth/components/AdminRoute";
 
@@ -28,6 +31,15 @@ export const MainRouter = () => {
       </Route>
       <Route path="/register" element={<AuthLayout />}>
         <Route path="" element={<RegisterUI />} />
+      </Route>
+      <Route path="/forgot-password" element={<AuthLayout />}>
+        <Route path="" element={<ForgotPasswordUI />} />
+      </Route>
+      <Route path="/reset-password" element={<AuthLayout />}>
+        <Route path="" element={<ResetPasswordUI />} />
+      </Route>
+      <Route path="/accept-invitation" element={<AuthLayout />}>
+        <Route path="" element={<AcceptInvitationUI />} />
       </Route>
       <Route
         path="/"

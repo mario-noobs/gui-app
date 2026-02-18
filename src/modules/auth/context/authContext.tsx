@@ -92,17 +92,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const handleUpdateProfile = async (data: IUpdateProfile) => {
     try {
-      const res = await UpdateProfileAPI<IResponse<boolean>>(data);
-
-      console.log(res);
-      setProfile((prev) => {
-        if (prev) {
-          return { ...prev, ...data };
-        }
-        return null;
-      });
+      await UpdateProfileAPI<IResponse<IProfile>>(data);
+      await handleGetProfile();
     } catch (error) {
       HandleError(error as Error | AxiosError<ErrorResponse>);
+      throw error;
     }
   };
 

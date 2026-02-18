@@ -43,7 +43,24 @@ export const RegisterAPI = <T>(data: IRegisterForm): Promise<T> => {
 export const UpdateProfileAPI = <T>(data: IUpdateProfile): Promise<T> => {
   return new Promise((resolve, reject) => {
     interceptor
-      .patch(`/user/v1/profile`, data)
+      .put(`/api/v1/profile`, data)
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const ChangePasswordAPI = <T>(data: {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    interceptor
+      .put("/api/v1/user/change-password", data)
       .then((response) => {
         resolve(response.data);
       })

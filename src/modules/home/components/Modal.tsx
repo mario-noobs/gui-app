@@ -4,9 +4,16 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export default function Modal({ open, onClose, children }: ModalProps) {
+const sizeClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-2xl',
+};
+
+export default function Modal({ open, onClose, children, size = 'md' }: ModalProps) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -28,7 +35,7 @@ export default function Modal({ open, onClose, children }: ModalProps) {
         onClick={onClose}
       />
       {/* Modal content */}
-      <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
+      <div className={`relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200`}>
         {children}
       </div>
     </div>

@@ -10,6 +10,8 @@ import { enqueueSnackbar } from "notistack";
 import { AuthContext } from '../../auth/context/authContext';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import EditProfileModal from '../components/EditProfileModal';
+import { IUserProfile } from '../../auth/models/auth';
+import { getCountryName, getGenderLabel } from '../constants/countries';
 
 interface UserData {
   data: {
@@ -27,6 +29,7 @@ interface UserData {
       permissions: string[];
     } | null;
     status: string;
+    profile: IUserProfile | null;
   }
 }
 
@@ -122,7 +125,7 @@ const Profile = () => {
     }
   }, [userData?.data?.id]);
 
-  const handleSaveProfile = async (data: { first_name: string; last_name: string; phone: string }) => {
+  const handleSaveProfile = async (data: { first_name: string; last_name: string; phone: string; profile?: Partial<IUserProfile> }) => {
     try {
       await handleUpdateProfile(data);
       await handleGetProfile();
@@ -245,6 +248,10 @@ const Profile = () => {
               { label: 'First Name', value: d?.first_name || 'Not specified' },
               { label: 'Last Name', value: d?.last_name || 'Not specified' },
               { label: 'Phone', value: d?.phone || 'Not specified', muted: !d?.phone },
+              { label: 'Display Name', value: d?.profile?.display_name || 'Not specified', muted: !d?.profile?.display_name },
+              { label: 'Gender', value: getGenderLabel(d?.profile?.gender) || 'Not specified', muted: !d?.profile?.gender },
+              { label: 'Date of Birth', value: d?.profile?.date_of_birth ? new Date(d.profile.date_of_birth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not specified', muted: !d?.profile?.date_of_birth },
+              { label: 'Bio', value: d?.profile?.bio || 'Not specified', muted: !d?.profile?.bio },
               { label: 'Member since', value: new Date(d?.created_at || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
               { label: 'Last updated', value: new Date(d?.updated_at || '').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) },
             ].map((row) => (
@@ -255,6 +262,46 @@ const Profile = () => {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Address */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm">
+          <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-100">
+            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+            </div>
+            <span className="text-sm font-semibold text-gray-900">Address</span>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {(() => {
+              const p = d?.profile;
+              const hasAddress = p?.address_line_1 || p?.city || p?.state || p?.postal_code || p?.country;
+              if (!hasAddress) {
+                return (
+                  <div className="px-6 py-6 text-center">
+                    <p className="text-sm text-gray-400 italic">No address information provided</p>
+                  </div>
+                );
+              }
+              return [
+                { label: 'Address', value: [p?.address_line_1, p?.address_line_2].filter(Boolean).join(', ') || 'Not specified', muted: !p?.address_line_1 },
+                { label: 'City', value: p?.city || 'Not specified', muted: !p?.city },
+                { label: 'State', value: p?.state || 'Not specified', muted: !p?.state },
+                { label: 'Postal Code', value: p?.postal_code || 'Not specified', muted: !p?.postal_code },
+                { label: 'Country', value: p?.country ? `${getCountryName(p.country)} (${p.country})` : 'Not specified', muted: !p?.country },
+              ].map((row) => (
+                <div key={row.label} className="flex items-center justify-between px-6 py-3.5">
+                  <span className="text-sm text-gray-500">{row.label}</span>
+                  <span className={`text-sm font-medium ${row.muted ? 'text-gray-400 italic' : 'text-gray-900'}`}>
+                    {row.value}
+                  </span>
+                </div>
+              ));
+            })()}
           </div>
         </div>
 
@@ -433,6 +480,7 @@ const Profile = () => {
           first_name: d?.first_name || '',
           last_name: d?.last_name || '',
           phone: d?.phone || '',
+          profile: d?.profile ? { ...d.profile } : {},
         }}
       />
       <ChangePasswordModal

@@ -1,50 +1,83 @@
-# React + TypeScript + Vite
+# GUI App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 + TypeScript single-page application for the Face Recognition System. Built with Vite, styled with Tailwind CSS + Material Tailwind.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+pnpm install          # Install dependencies
+pnpm dev              # Dev server (http://localhost:5173)
+pnpm build            # Production build (tsc + vite)
+pnpm lint             # ESLint check
+npx tsc --noEmit      # Type check only
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Environment
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+VITE_APP_API_URL=http://localhost:3000   # API base URL (dev)
 ```
+
+In Docker: defaults to `/gateway`, nginx proxies `/gateway/*` to `backend:8080`.
+
+## Architecture
+
+Modular by feature under `src/modules/`:
+
+```
+src/modules/
+├── core/       # Shared: MainRouter, MainLayout, Header, Sidebar, Axios interceptor
+├── auth/       # Login, Register, ForgotPassword, ResetPassword, AcceptInvitation, AuthContext
+├── home/       # Dashboard, Profile, Audit, ChangePassword modal
+├── face-reg/   # Face register & recognize UI (camera + upload)
+├── admin/      # Admin dashboard, UserManagement, RoleManagement (SUPERADMIN only)
+└── todo/       # Todo list feature
+```
+
+Each module has: `components/`, `pages/`, `services/`, `models/`, and optionally `hooks/`, `context/`, `utils/`, `styles/`.
+
+## Routing
+
+**Public routes** (under `AuthLayout`):
+- `/login` — Login
+- `/register` — Register
+- `/forgot-password` — Request password reset email
+- `/reset-password` — Set new password via token link
+- `/accept-invitation` — Accept admin invitation & set password
+
+**Protected routes** (under `PrivateComponent` + `MainLayout`):
+- `/`, `/dashboard` — Dashboard
+- `/profile` — Profile management
+- `/audit` — Audit logs (AdminRoute guard)
+- `/face-regconize/register` — Face registration (permission guard)
+- `/face-regconize/recognize` — Face recognition (permission guard)
+- `/admin`, `/admin/users`, `/admin/roles` — Admin panel (AdminRoute guard)
+
+## Auth & Token Management
+
+- **Login flow:** Authenticate -> store tokens in localStorage -> fetch profile -> hydrate AuthContext
+- **Token refresh:** Axios interceptor catches 401 -> queues concurrent requests -> refreshes token -> retries all
+- **RBAC helpers:** `hasPermission()`, `hasRole()`, `isSuperAdmin()` in AuthContext
+- **Route guards:** `PrivateComponent` (auth), `AdminRoute` (SUPERADMIN), `FaceRegRouteGuard` (permissions)
+
+## Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| React 18 | UI framework |
+| TypeScript 5 | Type safety |
+| Vite 5 | Build tool & dev server |
+| Tailwind CSS 3 | Utility-first styling |
+| Material Tailwind | UI component library |
+| React Hook Form + Yup | Form handling & validation |
+| Axios | HTTP client with interceptors |
+| notistack | Toast notifications |
+| Heroicons / Lucide | Icons |
+
+## Docker
+
+```bash
+docker build -t gui-app .
+```
+
+Multi-stage build: Node builder -> nginx Alpine. Serves static files and proxies `/gateway/*` to backend.
